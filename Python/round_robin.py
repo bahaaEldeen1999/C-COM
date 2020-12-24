@@ -3,44 +3,32 @@ process = [
         "id": 0,
         "start": 0,
         "finish": 2,
-        "starterd": 0
+        "started": 0
     },
     {
         "id": 1,
         "start": 0,
         "finish": 4,
-        "starterd": 0
+        "started": 0
     },
     {
         "id": 2,
         "start": 1,
         "finish": 6,
-        "starterd": 0
+        "started": 0
     },
     {
         "id": 3,
         "start": 2,
         "finish": 9,
-        "starterd": 0
+        "started": 0
     },
     {
         "id": 4,
         "start": 8,
         "finish": 19,
-        "starterd": 0
-    },
-    {
-        "id": 5,
-        "start": 108,
-        "finish": 190,
-        "starterd": 0
-    },
-    {
-        "id": 6,
-        "start": 1008,
-        "finish": 1090,
-        "starterd": 0
-    },
+        "started": 0
+    }
 ]
 
 
@@ -66,8 +54,15 @@ def round_robin(process, quantum):
             continue
         p = q.pop(0)
         rem_time = remaining_time.pop(0)
-        # if p["started"] == 0:
-        #    print("At time "+str(time)+" process "+str(p["id"]+" "))
+        if p["started"] == 0:
+            p["wait"] = time-p["start"]
+            print("At time "+str(time)+" process "+str(p["id"])+" started arr "+str(p["start"])+" total "+str(
+                p["finish"]-p["start"])+" remain "+str(p["finish"]-p["start"])+" wait "+str(p["wait"]))
+        else:
+            p["wait"] += time-p["last"]
+            print("At time "+str(time)+" process "+str(p["id"])+" resumed arr "+str(p["start"])+" total "+str(
+                p["finish"]-p["start"])+" remain "+str(rem_time)+" wait "+str(p["wait"]))
+
         if rem_time > quantum:
             rem_time -= quantum
             time += quantum
@@ -77,10 +72,14 @@ def round_robin(process, quantum):
 
         if rem_time > 0:
             p["started"] = 1
+            p["last"] = time
             q.append(p)
             remaining_time.append(rem_time)
+            print("At time "+str(time)+" process "+str(p["id"])+" stopped arr "+str(p["start"])+" total "+str(
+                p["finish"]-p["start"])+" remain "+str(rem_time)+" wait "+str(p["wait"]))
         else:
-            print("finnished process "+str(p["id"]) + " at "+str(time))
+            print("At time "+str(time)+" process "+str(p["id"])+" finished arr "+str(p["start"])+" total "+str(
+                p["finish"]-p["start"])+" remain "+str(rem_time)+" wait "+str(p["wait"]))
 
 
-round_robin(process, 2)
+round_robin(process, 1)
