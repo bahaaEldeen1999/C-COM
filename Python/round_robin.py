@@ -79,7 +79,7 @@ def round_robin(process, quantum):
                 p["finish"]-p["start"])+" remain "+str(rem_time)+" wait "+str(p["wait"]))
         else:
             print("At time "+str(time)+" process "+str(p["id"])+" finished arr "+str(p["start"])+" total "+str(
-                p["finish"]-p["start"])+" remain "+str(rem_time)+" wait "+str(p["wait"]))
+                p["finish"]-p["start"])+" remain "+str(rem_time)+" wait "+str(p["wait"])+" TA "+str(time-p["start"])+" WTA "+str(round((time-p["start"])/(p["finish"]-p["start"]), 2)))
 
 
-round_robin(process, 1)
+round_robin(process, 2)
