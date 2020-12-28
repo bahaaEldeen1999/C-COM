@@ -6,6 +6,8 @@ typedef struct
       __u_char state;
 } PCB;
 
+// -------------------------------------Helper Functions---------------------------------------------
+
 void equalize(PCB *x, PCB *y)
 {
       x->arrivalTime = y->arrivalTime;
@@ -18,16 +20,32 @@ void equalize(PCB *x, PCB *y)
       x->state = y->state;
 }
 
-// __uint32_t xlessThanOrEqualy(const void *a, const void *b)
-// {
-//       PCB *x = (PCB *)a;
-//       PCB *y = (PCB *)b;
-//       return x->priority - y->priority;
-// }
+void swap(PCB *x, PCB *y)
+{
+      PCB tmp;
+      equalize(&tmp, y);
+      equalize(y, x);
+      equalize(x, &tmp);
+}
 
-// __uint32_t xgreaterThanOrEqualy(const void *a, const void *b)
-// {
-//       PCB *x = (PCB *)a;
-//       PCB *y = (PCB *)b;
-//       return y->priority - x->priority;
-// }
+__int32_t compare(PCB *x, PCB *y, char sortingKey[])
+{
+      if (sortingKey == "arrivalTime")
+            return (x->arrivalTime - y->arrivalTime);
+      else if (sortingKey == "burstTime")
+            return (x->burstTime - y->burstTime);
+      else if (sortingKey == "startTime")
+            return (x->startTime - y->startTime);
+      else if (sortingKey == "finishTime")
+            return (x->finishTime - y->finishTime);
+      else if (sortingKey == "lastRunTime")
+            return (x->lastRunTime - y->lastRunTime);
+      else
+            return (x->priority - y->priority);
+}
+
+void printPCB(PCB x)
+{
+      printf("#id arrival priority burst\n");
+      printf("%d\t%d\t%d\t%d\n", x.ID, x.arrivalTime, x.priority, x.burstTime);
+}

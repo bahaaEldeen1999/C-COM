@@ -9,7 +9,7 @@ typedef struct
       PCB *array;
 } vector;
 
-// --------------------------------------------------------------------
+// -------------------------------------Helper Functions---------------------------------------------
 
 void initialize(vector *v, __uint32_t sz)
 {
@@ -98,7 +98,14 @@ PCB find(vector *v, __uint32_t id)
       return x;
 }
 
-void sort(vector *v)
+void sort(vector *v, char sortingKey[])
 {
-      // ignored for now
+      for (__int32_t i = 0; i <= v->last; i++)
+      {
+            for (__int32_t j = i + 1; j <= v->last; j++)
+            {
+                  if (compare(&v->array[i], &v->array[j], sortingKey) > 0)
+                        swap(&v->array[i], &v->array[j]);
+            }
+      }
 }

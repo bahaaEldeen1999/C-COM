@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include "PCB.h"
 #include "vector.h"
 
 void testVectorValidity()
@@ -30,6 +29,12 @@ void testVectorValidity()
       printf("testing push\nsize = %d\n", sz); // 4
       PCB y = find(&v, 5);
       printf("testing find\npriority = %d\n", y.priority); // 100
+      sort(&v, "pri");
+      for (int i = 0; i <= v.last; i++)
+      {
+            printf("%d\n", v.array[i].priority);
+      }
+      puts("");
 }
 
 vector fileHandler(int numberOfProcesses)
@@ -56,21 +61,4 @@ vector fileHandler(int numberOfProcesses)
             printf("cannot open the file\n");
       }
       return v;
-}
-
-int main(int argc, char *argv[])
-{
-      /*
-            IMPORTANT NOTE: YOU SHOULD PASS THE NUMBER OF PROCESSES 
-                              AS A COMMAND-LINE-ARGUMENT TO THIS FILE
-      */
-
-      // uncomment following line to see testing of vector ADT
-      // testVectorValidity();
-
-      // testing file handler function
-      vector x = fileHandler(atoi(argv[1]));
-      PCB t = get(&x, 2);
-      printf("%d\n", t.ID);
-      return 0;
 }
