@@ -2,15 +2,15 @@
 
 typedef struct
 {
-      __uint8_t isSorted;
-      __uint32_t size_;
-      __int32_t last;
+      unsigned int isSorted;
+      unsigned int size_;
+      int last;
       PCB *array;
 } vector;
 
 // -------------------------------------Helper Functions---------------------------------------------
 
-void initialize(vector *v, __uint32_t sz)
+void initialize(vector *v, unsigned int sz)
 {
       v->isSorted = 0;
       v->last = sz - 1;
@@ -18,12 +18,12 @@ void initialize(vector *v, __uint32_t sz)
       v->size_ = sz + 10;
 }
 
-__int32_t size(vector *v)
+int size(vector *v)
 {
       return v->last + 1;
 }
 
-PCB get(vector *v, __int32_t index)
+PCB get(vector *v, int index)
 {
       if (index < 0 || index > v->last)
       {
@@ -33,7 +33,7 @@ PCB get(vector *v, __int32_t index)
       return v->array[index];
 }
 
-void set(vector *v, __int32_t index, PCB item)
+void set(vector *v, int index, PCB item)
 {
       if (index < 0 || index > v->last)
             return;
@@ -72,7 +72,7 @@ void push(vector *v, PCB item)
       {
             vector *tmp;
             tmp->array = malloc((v->size_ + 1000) * sizeof(PCB));
-            for (__uint32_t i = 0; i < v->last; i++)
+            for (unsigned int i = 0; i < v->last; i++)
             {
                   set(tmp, i, v->array[i]);
             }
@@ -86,9 +86,9 @@ void push(vector *v, PCB item)
       set(v, v->last, item);
 }
 
-PCB find(vector *v, __uint32_t id)
+PCB find(vector *v, unsigned int id)
 {
-      for (__uint32_t i = 0; i <= v->last; i++)
+      for (unsigned int i = 0; i <= v->last; i++)
       {
             if (v->array[i].ID == id)
                   return v->array[i];
@@ -99,9 +99,9 @@ PCB find(vector *v, __uint32_t id)
 
 void sort(vector *v, char sortingKey[])
 {
-      for (__int32_t i = 0; i <= v->last; i++)
+      for (int i = 0; i <= v->last; i++)
       {
-            for (__int32_t j = i + 1; j <= v->last; j++)
+            for (int j = i + 1; j <= v->last; j++)
             {
                   if (compare(&v->array[i], &v->array[j], sortingKey) > 0)
                         swap(&v->array[i], &v->array[j]);

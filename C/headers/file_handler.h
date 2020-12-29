@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "vector.h"
 
 void testVectorValidity()
@@ -6,7 +5,7 @@ void testVectorValidity()
       vector v;
       initialize(&v, 3);
       printf("created vector successfully, testing it\n");
-      __uint32_t sz = size(&v);
+      unsigned int sz = size(&v);
       printf("testing size\nsize = %d\n", sz); // 3
       PCB x = {.arrivalTime = 1, .burstTime = 3, .finishTime = 7, .ID = 1, .lastRunTime = 10, .priority = 3, .startTime = 5, .state = 'S'};
       set(&v, 0, x);
@@ -42,11 +41,10 @@ vector fileHandler(int numberOfProcesses)
       vector v;
       if (file)
       {
-            char *line = NULL;
-            size_t len = 0;
+            char line[256];
             int a, b, c, d;
             PCB input;
-            ssize_t read = getline(&line, &len, file);
+            fgets(line, sizeof(line), file);
             initialize(&v, numberOfProcesses);
             for (__int32_t i = 0; i < numberOfProcesses; i++)
             {
