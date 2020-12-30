@@ -2,8 +2,8 @@
 #include <stdlib.h>
 typedef struct
 {
-      unsigned int arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime;
-      unsigned char state;
+      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime;
+      __u_char state;
 } PCB;
 
 // -------------------------------------Helper Functions---------------------------------------------
@@ -28,7 +28,7 @@ void swap(PCB *x, PCB *y)
       equalize(x, &tmp);
 }
 
-unsigned int compare(PCB *x, PCB *y, char sortingKey[])
+__uint32_t compare(PCB *x, PCB *y, char sortingKey[])
 {
       if (sortingKey == "arrivalTime")
             return (x->arrivalTime - y->arrivalTime);
