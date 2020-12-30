@@ -19,7 +19,7 @@ void initialize(vector *v, __uint32_t sz)
 
 __int32_t size(vector *v)
 {
-      return v->tail + 1;
+      return (v->tail - v->head + 1);
 }
 
 PCB get(vector *v, __int32_t index)
