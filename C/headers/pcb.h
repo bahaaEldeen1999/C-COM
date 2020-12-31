@@ -2,7 +2,7 @@
 #include <stdlib.h>
 typedef struct
 {
-      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime;
+      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime, remainingTime, waitTime;
       __u_char state;
 } PCB;
 
@@ -15,6 +15,8 @@ void equalize(PCB *x, PCB *y)
       x->startTime = y->startTime;
       x->finishTime = y->finishTime;
       x->lastRunTime = y->lastRunTime;
+      x->remainingTime = y->remainingTime;
+      x->waitTime = y->waitTime;
       x->ID = y->ID;
       x->priority = y->priority;
       x->state = y->state;

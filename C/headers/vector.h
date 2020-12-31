@@ -78,6 +78,8 @@ void set(vector *v, __int32_t index, PCB item)
       v->array[index].startTime = item.startTime;
       v->array[index].finishTime = item.finishTime;
       v->array[index].lastRunTime = item.lastRunTime;
+      v->array[index].remainingTime = item.remainingTime;
+      v->array[index].waitTime = item.waitTime;
       v->array[index].ID = item.ID;
       v->array[index].priority = item.priority;
       v->array[index].state = item.state;
