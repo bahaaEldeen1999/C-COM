@@ -46,6 +46,6 @@ __uint32_t compare(PCB *x, PCB *y, char sortingKey[])
 
 void printPCB(PCB x)
 {
-      printf("#id arrival priority burst\n");
-      printf("%d\t%d\t%d\t%d\n", x.ID, x.arrivalTime, x.priority, x.burstTime);
+      printf("#id arrival burst priority start finish state\n");
+      printf("%d\t%d\t%d\t%d\t%d\t%d\t%c\n", x.ID, x.arrivalTime, x.burstTime, x.priority, x.startTime, x.finishTime, x.state);
 }
