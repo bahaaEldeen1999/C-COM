@@ -1,9 +1,10 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 typedef struct
 {
-      unsigned int arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime;
-      unsigned char state;
+      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime, remainingTime, waitTime;
+      __u_char state;
 } PCB;
 
 // -------------------------------------Helper Functions---------------------------------------------
@@ -15,6 +16,8 @@ void equalize(PCB *x, PCB *y)
       x->startTime = y->startTime;
       x->finishTime = y->finishTime;
       x->lastRunTime = y->lastRunTime;
+      x->remainingTime = y->remainingTime;
+      x->waitTime = y->waitTime;
       x->ID = y->ID;
       x->priority = y->priority;
       x->state = y->state;
@@ -28,7 +31,7 @@ void swap(PCB *x, PCB *y)
       equalize(x, &tmp);
 }
 
-unsigned int compare(PCB *x, PCB *y, char sortingKey[])
+__uint32_t compare(PCB *x, PCB *y, char sortingKey[])
 {
       if (sortingKey == "arrivalTime")
             return (x->arrivalTime - y->arrivalTime);
@@ -46,6 +49,6 @@ unsigned int compare(PCB *x, PCB *y, char sortingKey[])
 
 void printPCB(PCB x)
 {
-      printf("#id arrival priority burst\n");
-      printf("%d\t%d\t%d\t%d\n", x.ID, x.arrivalTime, x.priority, x.burstTime);
+      printf("#id arrival burst priority start finish state\n");
+      printf("%d\t%d\t%d\t%d\t%d\t%d\t%c\n", x.ID, x.arrivalTime, x.burstTime, x.priority, x.startTime, x.finishTime, x.state);
 }

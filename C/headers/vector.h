@@ -1,94 +1,41 @@
+#pragma once
 #include "pcb.h"
 
 typedef struct
 {
-      unsigned int isSorted;
-      unsigned int size_;
-      int last;
+      __int32_t tail, head;
       PCB *array;
 } vector;
 
-// -------------------------------------Helper Functions---------------------------------------------
+/*Helper Functions*/
 
-void initialize(vector *v, unsigned int sz)
+// ----------------------- general usage (by both queue and array) functions------------------------
+
+__int32_t size(vector *v)
 {
-      v->isSorted = 0;
-      v->last = sz - 1;
-      v->array = malloc((sz + 10) * sizeof(PCB));
-      v->size_ = sz + 10;
+      return (v->tail - v->head + 1);
 }
 
-int size(vector *v)
+void printVector(vector *v)
 {
-      return v->last + 1;
-}
-
-PCB get(vector *v, int index)
-{
-      if (index < 0 || index > v->last)
+      for (int i = v->head; i <= v->tail; i++)
       {
-            PCB x = {.arrivalTime = 0, .burstTime = 0, .finishTime = 0, .ID = 0, .lastRunTime = 0, .priority = 0, .startTime = 0, .state = 'U'};
-            return x;
+            printPCB(v->array[i]);
       }
-      return v->array[index];
 }
 
-void set(vector *v, int index, PCB item)
+void initialize(vector *v, __uint32_t sz)
 {
-      if (index < 0 || index > v->last)
-            return;
-      v->array[index].arrivalTime = item.arrivalTime;
-      v->array[index].burstTime = item.burstTime;
-      v->array[index].startTime = item.startTime;
-      v->array[index].finishTime = item.finishTime;
-      v->array[index].lastRunTime = item.lastRunTime;
-      v->array[index].ID = item.ID;
-      v->array[index].priority = item.priority;
-      v->array[index].state = item.state;
+      v->head = 0;
+      v->tail = sz - 1;
+      v->array = malloc((sz) * sizeof(PCB));
 }
 
-void pop(vector *v)
-{
-      if (v->last < 0)
-            return;
-      v->array[v->last].arrivalTime = 0, v->array[v->last].burstTime = 0, v->array[v->last].startTime = 0,
-      v->array[v->last].finishTime = 0, v->array[v->last].lastRunTime = 0, v->array[v->last].ID = 0, v->array[v->last].priority = 0, v->array[v->last].state = 'U';
-      v->last--;
-}
+// ----------------------------------- array ONLY usage functions ----------------------------------
 
-PCB top(vector *v)
+PCB find(vector *v, __uint32_t id)
 {
-      if (v->last < 0)
-      {
-            PCB x = {.arrivalTime = 0, .burstTime = 0, .finishTime = 0, .ID = 0, .lastRunTime = 0, .priority = 0, .startTime = 0, .state = 'U'};
-            return x;
-      }
-      return v->array[0];
-}
-
-void push(vector *v, PCB item)
-{
-      if (v->last == v->size_)
-      {
-            vector *tmp;
-            tmp->array = malloc((v->size_ + 1000) * sizeof(PCB));
-            for (unsigned int i = 0; i < v->last; i++)
-            {
-                  set(tmp, i, v->array[i]);
-            }
-            tmp->last = v->last + 1, tmp->size_ = v->size_ + 1000;
-            v = tmp;
-      }
-      else
-      {
-            v->last++;
-      }
-      set(v, v->last, item);
-}
-
-PCB find(vector *v, unsigned int id)
-{
-      for (unsigned int i = 0; i <= v->last; i++)
+      for (__int32_t i = v->head; i <= v->tail; i++)
       {
             if (v->array[i].ID == id)
                   return v->array[i];
@@ -99,12 +46,86 @@ PCB find(vector *v, unsigned int id)
 
 void sort(vector *v, char sortingKey[])
 {
-      for (int i = 0; i <= v->last; i++)
+      for (__int32_t i = v->head; i <= v->tail; i++)
       {
-            for (int j = i + 1; j <= v->last; j++)
+            for (__int32_t j = i + 1; j <= v->tail; j++)
             {
                   if (compare(&v->array[i], &v->array[j], sortingKey) > 0)
                         swap(&v->array[i], &v->array[j]);
             }
       }
+}
+
+PCB get(vector *v, __int32_t index)
+{
+      if (index < v->head || index > v->tail)
+      {
+            printf("access violation: index out of range!\n");
+            PCB x = {.arrivalTime = 0, .burstTime = 0, .finishTime = 0, .ID = 0, .lastRunTime = 0, .priority = 0, .startTime = 0, .state = 'U'};
+            return x;
+      }
+      return v->array[index];
+}
+
+void set(vector *v, __int32_t index, PCB item)
+{
+      if (index < v->head || index > v->tail)
+      {
+            printf("access violation: index out of range!\n");
+            return;
+      }
+      v->array[index].arrivalTime = item.arrivalTime;
+      v->array[index].burstTime = item.burstTime;
+      v->array[index].startTime = item.startTime;
+      v->array[index].finishTime = item.finishTime;
+      v->array[index].lastRunTime = item.lastRunTime;
+      v->array[index].remainingTime = item.remainingTime;
+      v->array[index].waitTime = item.waitTime;
+      v->array[index].ID = item.ID;
+      v->array[index].priority = item.priority;
+      v->array[index].state = item.state;
+}
+
+// ----------------------------------- queue ONLY usage functions ----------------------------------
+
+void pop(vector *v)
+{
+      if (v->head > v->tail)
+      {
+            printf("access violation: queue already is empty!\n");
+            return;
+      }
+
+      v->head++;
+
+      if (v->head > v->tail)
+      {
+            // re-initialize the array to avoid memory leak
+            initialize(v, 0);
+      }
+}
+
+PCB top(vector *v)
+{
+      if (v->head > v->tail)
+      {
+            printf("access violation: queue is empty!\n");
+            PCB x = {.arrivalTime = 0, .burstTime = 0, .finishTime = 0, .ID = 0, .lastRunTime = 0, .priority = 0, .startTime = 0, .state = 'U'};
+            return x;
+      }
+      return v->array[v->head];
+}
+
+void push(vector *v, PCB item)
+{
+      if (v->tail == -1 || v->tail % 10 == 9)
+      {
+            vector tmp;
+            initialize(&tmp, 11 + v->tail);
+            for (__int32_t i = v->head; i <= v->tail; i++)
+                  set(&tmp, i, v->array[i]);
+            v->array = tmp.array;
+      }
+      v->tail++;
+      set(v, v->tail, item);
 }

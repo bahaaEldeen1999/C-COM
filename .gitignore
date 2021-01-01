@@ -4,3 +4,4 @@ Python/__pycache__
 C/*.txt
 *.txt
 *.out
+*.log
