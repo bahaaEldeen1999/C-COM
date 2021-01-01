@@ -1,17 +1,19 @@
 #include "vector.h"
 #include "integer_queue.h"
+#include "headers.h"
 void roundRobin(vector *process, unsigned int quantum)
 {
     vector q;
     initialize(&q, 0);
-    push(&q, get(process, 0));
-    int time = get(&q, 0).arrivalTime; // this is gonna change to globl clock
+    //push(&q, get(process, 0));
+    int time = getClk(); //get(&q, 0).arrivalTime; // this is gonna change to globl clock
     //integer_queue remaining_time;
     //initializeQueue(&remaining_time, 0);
     //pushQueue(&remaining_time, get(&q, 0).burstTime);
-    int curr_index = 1;
+    int curr_index = 0;
     while (size(&q) > 0 || curr_index < size(process))
     {
+        time = getClk();
         int temp = curr_index;
         for (int i = temp; i < size(process); i++)
         {
@@ -29,7 +31,7 @@ void roundRobin(vector *process, unsigned int quantum)
         //printf("size Q %d\n", size(&q));
         if (size(&q) == 0)
         {
-            time += 1;
+            //time += 1;
             continue;
         }
         //printf("h1\n");
@@ -51,11 +53,20 @@ void roundRobin(vector *process, unsigned int quantum)
         }
         if (rem_time > quantum)
         {
+
+            while (getClk() - time < quantum)
+            {
+                // do nothing
+            }
             rem_time -= quantum;
             time += quantum;
         }
         else
         {
+            while (getClk() - time < rem_time)
+            {
+                // do nothing
+            }
             time += rem_time;
             rem_time = 0;
         }
@@ -82,6 +93,7 @@ void roundRobin(vector *process, unsigned int quantum)
 
 int main()
 {
+    initClk();
     vector process;
     printf("initialze process vector\n");
     initialize(&process, 0);
