@@ -4,37 +4,45 @@
 #include "headers.h"
 
 void HPF(vector *v) {
-  printf("%d",size(&v));
-
   // Sort the vector w.r.t. priority
-  sort(&v, "priority");
-  printVector(&v);
+  sort(v, "priority");
 
-  printf("%d",size(&v));
+  // Initilize clk
+  initClk();
 
-  // Get the current clk
-  int time = getClk();
+  //FILE *outFile = fopen("schedulr.txt", "w");
+  printf("#At time x process y state arr w total z remain y wait k \n");
 
-  FILE *file = fopen("schedulr.log", "w");
-  fputs("#At time x process y state arr w total z remain y wait k \n", file);
-  unsigned int finished = 0;
-  while( finished != size(&v)) {
-    for (int i=0;i < size(&v);i++) {
+  // number of finished processes
+  int finished = 0;
+
+  // Loop to serve all processes
+  while( finished != size(v)) {
+
+    // Wait until the clk initialized (for the first time)
+    while(getClk() == -1);
+
+    for (int i=0;i < size(v);i++) {
+      // Skip the finished processes
       if (v->array[i].state == 'F') {
         continue;
       }
       else {   // State == N
-        if(v->array[i].arrivalTime < time) {
+        // Check if the not finished process arrived
+        if(v->array[i].arrivalTime < getClk()) {
+          // Update process start time
           v->array[i].startTime = getClk();
-          fprintf(file,"At time %d process %d started arr %d total %d remain %d wait %d\n",getClk(),v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,v->array[i].burstTime,getClk()-v->array[i].arrivalTime);
+          printf("At time %d process %d started arr %d total %d remain %d wait %d\n",getClk(),v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,v->array[i].burstTime,getClk()-v->array[i].arrivalTime);
           // Serve the process
-          while(getClk() < v->array[i].startTime + v->array[i].burstTime) {}
+          while(getClk() < v->array[i].startTime + v->array[i].burstTime);
           // Update the process info
           v->array[i].state = 'F';
           v->array[i].finishTime = getClk();
+          // Increment the processes counter
           finished+=1;
-          fprintf(file,"At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2d \n",getClk(),v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,0,v->array[i].startTime-v->array[i].arrivalTime,v->array[i].finishTime-v->array[i].arrivalTime,(v->array[i].finishTime-v->array[i].arrivalTime)/v->array[i].burstTime);
+          printf("At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n",getClk(),v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,0,v->array[i].startTime-v->array[i].arrivalTime,v->array[i].finishTime-v->array[i].arrivalTime,(v->array[i].finishTime-v->array[i].arrivalTime)/(v->array[i].burstTime*1.0));
         }
+        // If the process not finished and not arrived too skip it
         else {
           continue;
         }
@@ -93,7 +101,6 @@ int main() {
     p.waitTime=0;
     set(&process, 3, p);
     printf("HPF\n");
-    initClk();
     HPF(&process);
     destroyClk(true);
     return 0;
