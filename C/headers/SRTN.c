@@ -117,6 +117,10 @@ void SRTN(vector *v, int n)
 
         // If reaches here, then there is a running process.
         gotresponse->array[cur_proc].remainingTime--;
+
+        while (clk == getClk())
+        { /*wait*/
+        }
     }
     fclose(file);
 }
