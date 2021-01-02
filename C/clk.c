@@ -5,7 +5,7 @@
  * It is not a real part of operating system!
  */
 
-#include "headers.h"
+#include "headers/headers.h"
 
 int shmid;
 

@@ -1,6 +1,8 @@
 C/*.out
+C/*.o
 Python/__pycache__
 .vscode
 C/*.txt
 *.txt
 *.out
+*.o
