@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "headers/vector.h"
-#include "headers/headers.h"
+#include "vector.h"
+#include "headers.h"
 
 void action_log(FILE *file, PCB *item, char *statement, int clk)
 {
@@ -31,12 +31,14 @@ void SRTN(vector *v, int n)
     while (size(v) || size(gotresponse))
     {
         clk = getClk();
+        printf("%d\n", clk);
+        sleep(1);
 
         // See if there is currently running process and it finished. Then write in log, pop it from the queue, cur_proc=-1
         if (cur_proc != -1 && gotresponse->array[cur_proc].remainingTime == 0)
         {
             // Done Process
-            action_log(file, &gotresponse->array[cur_proc], "finished", clk);
+            action_log(file, &gotresponse->array[cur_proc], "finished", getClk());
             swap(&gotresponse->array[cur_proc], &gotresponse->array[gotresponse->head]);
             pop(gotresponse);
             cur_proc = -1;
@@ -59,14 +61,14 @@ void SRTN(vector *v, int n)
 
             if (best_in_v != -1 && gotresponse->array[cur_proc].remainingTime > v->array[best_in_v].remainingTime)
             {
-                action_log(file, &gotresponse->array[cur_proc], "stopped", clk);
+                action_log(file, &gotresponse->array[cur_proc], "stopped", getClk());
                 /*gotresponse->array[cur_proc].state = "stopped";*/
 
                 push(gotresponse, v->array[best_in_v]);
                 swap(&v->array[v->head], &v->array[best_in_v]);
                 pop(v);
                 cur_proc = gotresponse->tail;
-                action_log(file, &gotresponse->array[cur_proc], "started", clk);
+                action_log(file, &gotresponse->array[cur_proc], "started", getClk());
                 /*gotresponse->array[cur_proc].state = "started";*/
             }
         }
@@ -102,13 +104,13 @@ void SRTN(vector *v, int n)
                 pop(v);
 
                 cur_proc = gotresponse->tail;
-                action_log(file, &gotresponse->array[cur_proc], "started", clk);
+                action_log(file, &gotresponse->array[cur_proc], "started", getClk());
                 /*gotresponse->array[cur_proc].state = "started";*/
             }
             else
             {
                 cur_proc = best_in_gotresponse;
-                action_log(file, &gotresponse->array[cur_proc], "resumed", clk);
+                action_log(file, &gotresponse->array[cur_proc], "resumed", getClk());
                 /*gotresponse->array[cur_proc].state = "resumed";*/
             }
         }
@@ -116,6 +118,7 @@ void SRTN(vector *v, int n)
         // If reaches here, then there is a running process.
         gotresponse->array[cur_proc].remainingTime--;
     }
+    fclose(file);
 }
 
 int main()
@@ -133,5 +136,7 @@ int main()
     push(&v, z);
 
     SRTN(&v, size(&v));
+
+    destroyClk(1);
     return 0;
 }
