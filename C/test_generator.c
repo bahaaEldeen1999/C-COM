@@ -11,9 +11,9 @@ struct processData
     int id;
 };
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
-    FILE * pFile;
+    FILE *pFile;
     pFile = fopen("processes.txt", "w");
     int no;
     struct processData pData;
@@ -23,7 +23,7 @@ int main(int argc, char * argv[])
     //fprintf(pFile,"%d\n",no);
     fprintf(pFile, "#id arrival runtime priority\n");
     pData.arrivaltime = 1;
-    for (int i = 1 ; i <= no ; i++)
+    for (int i = 1; i <= no; i++)
     {
         //generate Data Randomly
         //[min-max] = rand() % (max_number + 1 - minimum_number) + minimum_number
