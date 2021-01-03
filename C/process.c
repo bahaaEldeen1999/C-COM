@@ -1,20 +1,26 @@
-#include "headers.h"
+#include "headers/headers.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-/* Modify this file as needed*/
 int remainingtime;
 
-int main(int agrc, char * argv[])
+int main(int agrc, char *argv[])
 {
     initClk();
-    
-    //TODO it needs to get the remaining time from somewhere
-    //remainingtime = ??;
+    remainingtime = atoi(argv[1]);
     while (remainingtime > 0)
     {
-        // remainingtime = ??;
+        // sleep scheduler
+        int lastTime = getClk();
+        while (getClk() - lastTime < 1)
+        {
+        }
+        lastTime = getClk();
+        remainingtime -= 1;
+        // wake scheduler
     }
-    
+
     destroyClk(false);
-    
+
     return 0;
 }
