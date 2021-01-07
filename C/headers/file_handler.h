@@ -1,38 +1,53 @@
+#pragma once
 #include "vector.h"
 
 void testVectorValidity()
 {
-      vector v;
-      initialize(&v, 3);
-      printf("created vector successfully, testing it\n");
-      unsigned int sz = size(&v);
-      printf("testing size\nsize = %d\n", sz); // 3
-      PCB x = {.arrivalTime = 1, .burstTime = 3, .finishTime = 7, .ID = 1, .lastRunTime = 10, .priority = 3, .startTime = 5, .state = 'S'};
-      set(&v, 0, x);
-      x = get(&v, 0);
-      printf("testing set&get\nID=%d\n", x.ID); // 1
-      x.ID = 4;
-      set(&v, 0, x);
-      x = top(&v);
-      printf("testing top\nID=%d\n", x.ID); // 4
-      x.ID = 3;
-      set(&v, 1, x);
-      x.ID = 5;
-      x.priority = 100;
-      set(&v, 2, x);
-      x.priority = 50;
-      x.ID = 7;
-      push(&v, x);
-      sz = size(&v);
-      printf("testing push\nsize = %d\n", sz); // 4
-      PCB y = find(&v, 5);
-      printf("testing find\npriority = %d\n", y.priority); // 100
-      sort(&v, "pri");
-      for (int i = 0; i <= v.last; i++)
+      PCB x = {.arrivalTime = 0, .burstTime = 0, .finishTime = 0, .lastRunTime = 0, .startTime = 0, .state = 'N'};
+      //--------------------------- act as a fixed sized array
+      printf("------------------ testing array functionalities ------------------\n");
+      vector array;
+      initialize(&array, 5);
+      for (int i = 0; i < 5; i++)
       {
-            printf("%d\n", v.array[i].priority);
+            x.ID = i;
+            x.priority = 4 - i;
+            set(&array, i, x);
       }
-      puts("");
+      for (int i = 0; i < 5; i++)
+      {
+            x = get(&array, i);
+            printf("array[%d].ID=%d  should be=%d\n", i, x.ID, i);
+      }
+
+      x = find(&array, 3);
+      printf("find element: ID=%d  should be=3\n", x.ID);
+
+      sort(&array, "priority");
+      printVector(&array);
+
+      //--------------------------- act as a queue
+      printf("------------------ testing queue functionalities ------------------\n");
+      vector queue;
+      initialize(&queue, 0);
+      for (int i = 0; i < 5; i++)
+      {
+            x.ID = i;
+            x.priority = 4 - i;
+            push(&queue, x);
+      }
+
+      printf("size=%d  should be=5\n", size(&queue));
+
+      x = top(&queue);
+      printf("top.ID=%d  should be=0\n", x.ID);
+
+      for (int i = 0; i < 5; i++)
+      {
+            pop(&queue);
+      }
+
+      printf("size=%d  should be=0\n", size(&queue));
 }
 
 vector fileHandler(int numberOfProcesses)
@@ -49,7 +64,7 @@ vector fileHandler(int numberOfProcesses)
             for (__int32_t i = 0; i < numberOfProcesses; i++)
             {
                   fscanf(file, "%d\t%d\t%d\t%d", &a, &b, &c, &d);
-                  input.ID = a, input.arrivalTime = b, input.burstTime = c, input.priority = d;
+                  input.ID = a, input.arrivalTime = b, input.burstTime = c, input.priority = d, input.state = 'N', input.remainingTime = c, input.startTime = 0, input.finishTime = 0, input.lastRunTime = 0, input.waitTime = 0, input.startTime = -1;
                   set(&v, i, input);
             }
       }

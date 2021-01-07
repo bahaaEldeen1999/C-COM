@@ -1,17 +1,17 @@
 #include "headers/headers.h"
+#include "headers/vector.h"
 #include "headers/round_robin.h"
 #include "headers/message_buffer.h"
 #include <sys/shm.h>
+vector *getPCB(int shmid);
 int main(int argc, char *argv[])
 {
     initClk();
+    printf("run sc\n");
 
-    int shmid, pid;
-
-    //printf("scheduler pid %d\n", getpid());
-    //roundRobin((vector *)NULL, 0);
-    //TODO implement the scheduler :)
-    //upon termination release the clock resources.
+    int shmk = ftok("key_process_table", 65);
+    int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
+    printf("shmid %d\n", shmid);
 
     key_t key_id;
     int msgq_id1, msgq_id2, send_val;
@@ -21,73 +21,36 @@ int main(int argc, char *argv[])
     msgq_id2 = msgget(key_id + 6, 0666 | IPC_CREAT);
     // shmid = shmget(key_id, 4096, IPC_CREAT | 0644);
 
-    // // get PCB
-    // vector *PCB = getPCB(shmid);
+    // get PCB
+    int algorithmNumber = atoi(argv[1]);
+    int quatum = atoi(argv[2]);
 
-    // int algorithmNumber = atoi(argv[1]);
-    // switch (algorithmNumber)
-    // {
-    // case 0:
-    //     // RR
+    printf("h1\n");
+    vector *processTable = getPCB(shmid);
 
-    //     break;
-    // case 1:
-    //     // SRTN
-    //     break;
-    // case 2:
-    //     // HPF
-    //     break;
+    switch (algorithmNumber)
+    {
+    case 0:
+        // RR
+        roundRobin(processTable, quatum, msgq_id1, msgq_id2);
+        break;
+    case 1:
+        // SRTN
+        break;
+    case 2:
+        // HPF
+        break;
 
-    // default:
-    //     break;
-    // }
-    vector process;
-    printf("initialze process vector\n");
-    initialize(&process, 0);
-    PCB p;
-    p.waitTime = 0;
-    p.ID = 0;
-    p.pindx = p.ID;
-    p.arrivalTime = 0;
-    p.burstTime = 2;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 1;
-    p.pindx = p.ID;
-    p.arrivalTime = 0;
-    p.burstTime = 4;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 2;
-    p.pindx = p.ID;
-    p.arrivalTime = 1;
-    p.burstTime = 5;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 3;
-    p.pindx = p.ID;
-    p.arrivalTime = 2;
-    p.burstTime = 9;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 4;
-    p.pindx = p.ID;
-    p.arrivalTime = 8;
-    p.burstTime = 7;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    printf("round robin\n");
-    roundRobin(&process, 2, msgq_id1, msgq_id2);
+    default:
+        break;
+    }
+
     destroyClk(true);
 }
 
-void *getPCB(int shmid)
+vector *getPCB(int shmid)
 {
-    void *shmaddr = shmat(shmid, (void *)0, 0);
+
+    vector *shmaddr = (vector *)shmat(shmid, (void *)0, 0);
     return shmaddr;
 }
