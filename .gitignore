@@ -1,8 +1,12 @@
 C/*.out
 C/*.o
+C/headers/*.o
+C/headers/*.out
 Python/__pycache__
 .vscode
 C/*.txt
 *.txt
 *.out
 *.o
+*.log
+scheduler.log

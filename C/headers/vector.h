@@ -1,3 +1,4 @@
+#pragma once
 #include "pcb.h"
 
 typedef struct
@@ -84,6 +85,7 @@ void set(vector *v, __int32_t index, PCB item)
       v->array[index].ID = item.ID;
       v->array[index].priority = item.priority;
       v->array[index].state = item.state;
+      v->array[index].pindx = item.pindx;
 }
 
 // ----------------------------------- queue ONLY usage functions ----------------------------------
