@@ -7,5 +7,6 @@ Python/__pycache__
 C/*.txt
 *.txt
 *.out
+*.o
 *.log
 scheduler.log
