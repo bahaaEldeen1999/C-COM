@@ -10,3 +10,4 @@ C/*.txt
 *.o
 *.log
 scheduler.log
+*.perf

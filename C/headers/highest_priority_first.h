@@ -5,6 +5,7 @@
 #include "message_buffer.h"
 
 void HPF(vector *v, int msgqid1, int msgqid2) {
+  printf("ffff\n");
   // Sort the vector w.r.t. priority
   sort(v, "priority");
 
