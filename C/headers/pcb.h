@@ -23,6 +23,7 @@ void equalize(PCB *x, PCB *y)
       x->ID = y->ID;
       x->priority = y->priority;
       x->state = y->state;
+      x->pindx = y->pindx;
 }
 
 void swap(PCB *x, PCB *y)

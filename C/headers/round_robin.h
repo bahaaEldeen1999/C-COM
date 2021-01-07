@@ -10,16 +10,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "message_buffer.h"
-void roundRobin(vector *process, unsigned int quantum, int msgqid)
+void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
 {
-    //printf("pid %d\n", getpid());
+
     vector q;
     initialize(&q, 0);
-    //push(&q, get(process, 0));
-    int time = getClk(); //get(&q, 0).arrivalTime; // this is gonna change to globl clock
-    //integer_queue remaining_time;
-    //initializeQueue(&remaining_time, 0);
-    //pushQueue(&remaining_time, get(&q, 0).burstTime);
+    int time = getClk();
     struct msgbuff message;
     int curr_index = 0;
     while (size(&q) > 0 || curr_index < size(process))
@@ -31,7 +27,6 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
             if (get(process, i).arrivalTime <= time)
             {
                 push(&q, get(process, i));
-                //pushQueue(&remaining_time, get(process, i).burstTime);
                 curr_index++;
             }
             else
@@ -39,16 +34,12 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
                 break;
             }
         }
-        //printf("size Q %d\n", size(&q));
         if (size(&q) == 0)
         {
-            //time += 1;
             continue;
         }
-        //printf("h1\n");
         PCB p = top(&q);
         pop(&q);
-        //printf("h2\n");
         int rem_time = p.remainingTime;
         int firstTime = 0;
         if (p.startTime == -1)
@@ -60,7 +51,6 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
         }
         else
         {
-            //printf("last run time %d wait time %d\n", p.lastRunTime, p.waitTime);
             p.waitTime += time - p.lastRunTime;
             printf("At time %d process %d resumed arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime);
         }
@@ -69,8 +59,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
 
             while (getClk() - time < quantum)
             {
-                //printf("rem time %d\n", rem_time);
-
+                //printf("clk %d\n", getClk());
                 // check if first time then fork the process and run it for d=first time
                 if (firstTime == 1)
                 {
@@ -79,7 +68,6 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
                     int pid = fork();
                     if (pid == 0)
                     {
-                        //printf("start process %d for first time \n", p.ID);
                         // execute the process.o
                         char rem[100];
                         sprintf(rem, "%d", p.remainingTime);
@@ -89,24 +77,27 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
                     {
                         // set process pid to pid
                         p.pid = pid;
-                        msgrcv(msgqid, &message, sizeof(message.mtext), 0, !IPC_NOWAIT);
+                        message.mtype = p.pid;
+                        msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
+                        message.mtype = getpid();
+                        msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
+                        message.mtype = getpid();
                         kill(p.pid, SIGSTOP);
-                        //raise(SIGSTOP);
                     }
                 }
                 else
                 {
                     // resume process
-                    //printf("cont 1 %d\n", p.pid);
+                    //printf("cont %d \n", getClk());
                     kill(p.pid, SIGCONT);
-                    msgrcv(msgqid, &message, sizeof(message.mtext), 0, !IPC_NOWAIT);
-                    //printf("stp 1\n");
+                    message.mtype = p.pid;
+                    msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
+                    message.mtype = getpid();
+                    msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
+                    message.mtype = getpid();
+                    //printf("rec %d \n", getClk());
                     kill(p.pid, SIGSTOP);
-                    // stop myself
-                    //raise(SIGSTOP);
                 }
-                // stop prcess as soon as time finish
-                //kill(p.pid, SIGSTOP);
             }
             rem_time -= quantum;
             time += quantum;
@@ -115,8 +106,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
         {
             while (getClk() - time < rem_time)
             {
-                //printf("rem time in sched %d\n", rem_time);
-                //printf("clock %d time %d \n", getClk(), time);
+                //printf("clk %d\n", getClk());
                 // check if first time then fork the process and run it for d=first time
                 if (firstTime == 1)
                 {
@@ -124,51 +114,41 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
                     int pid = fork();
                     if (pid == 0)
                     {
-                        char cwd[1000];
-                        //printf("start process %d for first time \n", p.ID);
-                        // execute the process.o
-                        // getcwd(cwd, 1000);
-                        // strcat(cwd, "/process.out");
-                        // printf("%s\n", cwd);
+
                         char rem[100];
                         sprintf(rem, "%d", p.remainingTime);
                         int x = execl("./process.out", "./process.out", rem, NULL);
-                        //printf("err %d\n", x);
                     }
                     else
                     {
                         // set process pid to pid
                         p.pid = pid;
-                        //printf("cild pid %d\n", p.pid);
-                        msgrcv(msgqid, &message, sizeof(message.mtext), 0, !IPC_NOWAIT);
-                        //printf("stopped\n");
-                        //printf("cild pid %d\n", p.pid);
+                        message.mtype = p.pid;
+                        msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
+                        message.mtype = getpid();
+                        msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
+                        message.mtype = getpid();
                         kill(p.pid, SIGSTOP);
-                        //raise(SIGSTOP);
                     }
                 }
                 else
                 {
                     // resume process
-                    //kill(p.pid, SIGCONT);
-                    // stop myself
-                    //raise(SIGSTOP);
-                    //printf("cont 2 %d\n", p.pid);
                     kill(p.pid, SIGCONT);
-                    msgrcv(msgqid, &message, sizeof(message.mtext), 0, !IPC_NOWAIT);
-                    //printf("stp 2\n");
+                    message.mtype = p.pid;
+                    msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
+                    message.mtype = getpid();
+                    msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
+                    message.mtype = getpid();
                     kill(p.pid, SIGSTOP);
                 }
-                // stop prcess as soon as i wakeup
-                //kill(p.pid, SIGSTOP);
             }
 
             time += rem_time;
             rem_time = 0;
-            kill(p.pid, SIGCONT);
+            int state;
+            waitpid(p.pid, &state, (int)NULL);
         }
-
-        //printf("rem time %d\n", rem_time);
 
         if (rem_time > 0)
         {
@@ -176,15 +156,12 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid)
             p.lastRunTime = time;
             p.remainingTime = rem_time;
             push(&q, p);
-            //printf("h3\n");
-            //pushQueue(&remaining_time, rem_time);
             printf("At time %d process %d stopped arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime);
         }
         else
         {
             printf("At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime, time - p.arrivalTime, (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime));
         }
-        //printf("sizeQ %d\n", size(&q));
     }
 }
 

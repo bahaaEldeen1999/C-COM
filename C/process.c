@@ -16,23 +16,30 @@ int main(int agrc, char *argv[])
     initClk();
     //printf("start process\n");
     key_t key_id;
-    int msgq_id, send_val;
+    int msgq_id1, msgq_id2, send_val;
 
     key_id = ftok("keyfile", 65);
-    msgq_id = msgget(key_id, 0666 | IPC_CREAT);
+    msgq_id1 = msgget(key_id, 0666 | IPC_CREAT);
+    msgq_id2 = msgget(key_id + 6, 0666 | IPC_CREAT);
     struct msgbuff message;
     message.mtype = getpid();
     strcpy(message.mtext, "stop");
     remainingtime = atoi(argv[1]);
     while (remainingtime > 0)
     {
+        //printf("waiting\n");
+        message.mtype = getpid();
+        msgrcv(msgq_id1, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
         int lastTime = getClk();
-        while (getClk() - lastTime <= 1)
+        while (getClk() - lastTime < 1)
         {
         }
         lastTime = getClk();
         remainingtime -= 1;
-        msgsnd(msgq_id, &message, sizeof(message.mtext), !IPC_NOWAIT);
+        message.mtype = getppid();
+        msgsnd(msgq_id2, &message, sizeof(message.mtext), !IPC_NOWAIT);
+        message.mtype = getpid();
+        //printf("send message \n");
     }
     destroyClk(false);
 

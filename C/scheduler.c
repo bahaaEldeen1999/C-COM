@@ -14,69 +14,75 @@ int main(int argc, char *argv[])
     //upon termination release the clock resources.
 
     key_t key_id;
-    int msgq_id, send_val;
+    int msgq_id1, msgq_id2, send_val;
 
     key_id = ftok("keyfile", 65);
-    msgq_id = msgget(key_id, 0666 | IPC_CREAT);
-    shmid = shmget(key_id, 4096, IPC_CREAT | 0644);
+    msgq_id1 = msgget(key_id, 0666 | IPC_CREAT);
+    msgq_id2 = msgget(key_id + 6, 0666 | IPC_CREAT);
+    // shmid = shmget(key_id, 4096, IPC_CREAT | 0644);
 
-    // get PCB
-    vector *PCB = getPCB(shmid);
+    // // get PCB
+    // vector *PCB = getPCB(shmid);
 
-    int algorithmNumber = atoi(argv[1]);
-    switch (algorithmNumber)
-    {
-    case 0:
-        // RR
+    // int algorithmNumber = atoi(argv[1]);
+    // switch (algorithmNumber)
+    // {
+    // case 0:
+    //     // RR
 
-        break;
-    case 1:
-        // SRTN
-        break;
-    case 2:
-        // HPF
-        break;
+    //     break;
+    // case 1:
+    //     // SRTN
+    //     break;
+    // case 2:
+    //     // HPF
+    //     break;
 
-    default:
-        break;
-    }
-    // vector process;
-    // printf("initialze process vector\n");
-    // initialize(&process, 0);
-    // PCB p;
-    // p.waitTime = 0;
-    // p.ID = 0;
-    // p.arrivalTime = 0;
-    // p.burstTime = 2;
-    // p.startTime = -1;
-    // p.remainingTime = p.burstTime;
-    // push(&process, p);
-    // p.ID = 1;
-    // p.arrivalTime = 0;
-    // p.burstTime = 4;
-    // p.startTime = -1;
-    // p.remainingTime = p.burstTime;
-    // push(&process, p);
-    // p.ID = 2;
-    // p.arrivalTime = 1;
-    // p.burstTime = 5;
-    // p.startTime = -1;
-    // p.remainingTime = p.burstTime;
-    // push(&process, p);
-    // p.ID = 3;
-    // p.arrivalTime = 2;
-    // p.burstTime = 9;
-    // p.startTime = -1;
-    // p.remainingTime = p.burstTime;
-    // push(&process, p);
-    // p.ID = 4;
-    // p.arrivalTime = 8;
-    // p.burstTime = 7;
-    // p.startTime = -1;
-    // p.remainingTime = p.burstTime;
-    // push(&process, p);
-    // printf("round robin\n");
-    // roundRobin(&process, 2, msgq_id);
+    // default:
+    //     break;
+    // }
+    vector process;
+    printf("initialze process vector\n");
+    initialize(&process, 0);
+    PCB p;
+    p.waitTime = 0;
+    p.ID = 0;
+    p.pindx = p.ID;
+    p.arrivalTime = 0;
+    p.burstTime = 2;
+    p.startTime = -1;
+    p.remainingTime = p.burstTime;
+    push(&process, p);
+    p.ID = 1;
+    p.pindx = p.ID;
+    p.arrivalTime = 0;
+    p.burstTime = 4;
+    p.startTime = -1;
+    p.remainingTime = p.burstTime;
+    push(&process, p);
+    p.ID = 2;
+    p.pindx = p.ID;
+    p.arrivalTime = 1;
+    p.burstTime = 5;
+    p.startTime = -1;
+    p.remainingTime = p.burstTime;
+    push(&process, p);
+    p.ID = 3;
+    p.pindx = p.ID;
+    p.arrivalTime = 2;
+    p.burstTime = 9;
+    p.startTime = -1;
+    p.remainingTime = p.burstTime;
+    push(&process, p);
+    p.ID = 4;
+    p.pindx = p.ID;
+    p.arrivalTime = 8;
+    p.burstTime = 7;
+    p.startTime = -1;
+    p.remainingTime = p.burstTime;
+    push(&process, p);
+    printf("round robin\n");
+    roundRobin(&process, 2, msgq_id1, msgq_id2);
     destroyClk(true);
 }
 
