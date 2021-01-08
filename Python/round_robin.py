@@ -74,7 +74,7 @@ def round_robin(process, quantum):
         else:
             time += rem_time
             rem_time = 0
-
+        # p  rint("rem time ")
         if rem_time > 0:
             p["started"] = 1
             p["last"] = time

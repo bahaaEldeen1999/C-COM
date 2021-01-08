@@ -5,7 +5,7 @@
  * It is not a real part of operating system!
  */
 
-#include "headers.h"
+#include "headers/headers.h"
 
 int shmid;
 
@@ -18,7 +18,7 @@ void cleanup(int signum)
 }
 
 /* This file represents the system clock for ease of calculations */
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
     printf("Clock starting\n");
     signal(SIGINT, cleanup);
@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
         perror("Error in creating shm!");
         exit(-1);
     }
-    int * shmaddr = (int *) shmat(shmid, (void *)0, 0);
+    int *shmaddr = (int *)shmat(shmid, (void *)0, 0);
     if ((long)shmaddr == -1)
     {
         perror("Error in attaching the shm in clock!");

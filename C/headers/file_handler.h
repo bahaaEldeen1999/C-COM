@@ -1,3 +1,4 @@
+#pragma once
 #include "vector.h"
 
 void testVectorValidity()
@@ -63,7 +64,7 @@ vector fileHandler(int numberOfProcesses)
             for (__int32_t i = 0; i < numberOfProcesses; i++)
             {
                   fscanf(file, "%d\t%d\t%d\t%d", &a, &b, &c, &d);
-                  input.ID = a, input.arrivalTime = b, input.burstTime = c, input.priority = d, input.state = 'N', input.remainingTime = c, input.startTime = 0, input.finishTime = 0, input.lastRunTime = 0, input.waitTime = 0;
+                  input.ID = a, input.arrivalTime = b, input.burstTime = c, input.priority = d, input.state = 'N', input.remainingTime = c, input.startTime = 0, input.finishTime = 0, input.lastRunTime = 0, input.waitTime = 0, input.startTime = -1;
                   set(&v, i, input);
             }
       }
