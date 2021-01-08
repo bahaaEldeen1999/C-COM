@@ -15,7 +15,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
 {
     FILE *scheduler_log = fopen("./scheduler.log", "w");
     FILE *scheduler_perf = fopen("./scheduler.perf", "w");
-
+    fprintf(scheduler_log, "#At time x process y state arr w total z remain y wait k \n");
     vector q;
     initialize(&q, 0);
     float expectedTime = 0;

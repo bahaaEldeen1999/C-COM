@@ -2,6 +2,7 @@
 #include "headers/vector.h"
 #include "headers/round_robin.h"
 #include "headers/message_buffer.h"
+#include "headers/shortest_remaining_time_next.h"
 #include <sys/shm.h>
 vector *getPCB(int shmid);
 int main(int argc, char *argv[])
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
         break;
     case 1:
         // SRTN
+        SRTN(processTable, msgq_id1, msgq_id2);
         break;
     case 2:
         // HPF
