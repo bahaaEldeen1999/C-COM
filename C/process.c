@@ -42,6 +42,6 @@ int main(int agrc, char *argv[])
         //printf("send message \n");
     }
     destroyClk(false);
-
-    return 0;
+    //printf("end process\n");
+    exit(0);
 }

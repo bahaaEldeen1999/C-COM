@@ -9,12 +9,21 @@
 #include <sys/msg.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "message_buffer.h"
 void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
 {
+    FILE *scheduler_log = fopen("./scheduler.log", "w");
+    FILE *scheduler_perf = fopen("./scheduler.perf", "w");
 
     vector q;
     initialize(&q, 0);
+    float expectedTime = 0;
+    float trueTime = 0;
+    float totalWTA = 0;
+    float totalWait = 0;
+    int numOfProcess = size(process);
+    float *WTA = (float *)malloc(sizeof(float) * (numOfProcess + 1));
     int time = getClk();
     struct msgbuff message;
     int curr_index = 0;
@@ -47,12 +56,12 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
             firstTime = 1;
             p.waitTime = time - p.arrivalTime;
             p.startTime = time;
-            printf("At time %d process %d started arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, p.burstTime, p.waitTime);
+            fprintf(scheduler_log, "At time %d process %d started arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, p.burstTime, p.waitTime);
         }
         else
         {
             p.waitTime += time - p.lastRunTime;
-            printf("At time %d process %d resumed arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime);
+            fprintf(scheduler_log, "At time %d process %d resumed arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime);
         }
         if (rem_time > quantum)
         {
@@ -99,8 +108,10 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
                     kill(p.pid, SIGSTOP);
                 }
             }
+            trueTime += (getClk() - time);
+            expectedTime += quantum;
             rem_time -= quantum;
-            time += quantum;
+            time = getClk();
         }
         else
         {
@@ -134,19 +145,25 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
                 else
                 {
                     // resume process
+                    // printf("cont2 %d \n", getClk());
                     kill(p.pid, SIGCONT);
                     message.mtype = p.pid;
                     msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
                     message.mtype = getpid();
                     msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
+                    //printf("rec2 %d \n", getClk());
                     message.mtype = getpid();
                     kill(p.pid, SIGSTOP);
                 }
             }
+            //printf("wait for orocess to die\n");
 
-            time += rem_time;
+            trueTime += (getClk() - time);
+            expectedTime += rem_time;
+            time = getClk();
             rem_time = 0;
             int state;
+            kill(p.pid, SIGCONT);
             waitpid(p.pid, &state, (int)NULL);
         }
 
@@ -155,57 +172,38 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
 
             p.lastRunTime = time;
             p.remainingTime = rem_time;
+            process->array[p.index].lastRunTime = time;
+            process->array[p.index].startTime = p.startTime;
+            process->array[p.index].remainingTime = p.remainingTime;
+
             push(&q, p);
-            printf("At time %d process %d stopped arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime);
+            fprintf(scheduler_log, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime);
         }
         else
         {
-            printf("At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime, time - p.arrivalTime, (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime));
+
+            process->array[p.index].finishTime = time;
+            WTA[p.index] = (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime);
+            fprintf(scheduler_log, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n", time, p.ID, p.arrivalTime, p.burstTime, rem_time, p.waitTime, time - p.arrivalTime, (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime));
+
+            totalWait += p.waitTime;
+            totalWTA += (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime);
         }
     }
-}
 
-/*
-int main()
-{
-    initClk();
-    vector process;
-    printf("initialze process vector\n");
-    initialize(&process, 0);
-    PCB p;
-    p.waitTime = 0;
-    p.ID = 0;
-    p.arrivalTime = 0;
-    p.burstTime = 2;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 1;
-    p.arrivalTime = 0;
-    p.burstTime = 4;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 2;
-    p.arrivalTime = 1;
-    p.burstTime = 5;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 3;
-    p.arrivalTime = 2;
-    p.burstTime = 9;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    p.ID = 4;
-    p.arrivalTime = 8;
-    p.burstTime = 7;
-    p.startTime = -1;
-    p.remainingTime = p.burstTime;
-    push(&process, p);
-    printf("round robin\n");
-    roundRobin(&process, 2);
-    return 0;
+    // calculating perf file
+    float avgWTA = totalWTA / numOfProcess;
+    float avgWait = totalWait / numOfProcess;
+    float cpuUtilize = (expectedTime / trueTime) * 100;
+    float stdWTA = 0;
+    for (int i = 0; i < numOfProcess; i++)
+    {
+        stdWTA += (WTA[i] - avgWTA) * (WTA[i] - avgWTA);
+    }
+    stdWTA /= numOfProcess;
+    stdWTA = sqrt(stdWTA);
+    ///////////////////////
+    fprintf(scheduler_perf, "CPU utilization = %.2f%\nAvg WTA = %.2f\nAvg Waiting = %.2f\nstd WTA = %.2f", cpuUtilize, avgWTA, avgWait, stdWTA);
+    fclose(scheduler_log);
+    fclose(scheduler_perf);
 }
-*/
