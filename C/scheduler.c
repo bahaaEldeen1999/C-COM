@@ -3,6 +3,7 @@
 #include "headers/round_robin.h"
 #include "headers/message_buffer.h"
 #include "headers/shortest_remaining_time_next.h"
+#include "headers/highest_priority_first.h"
 #include <sys/shm.h>
 vector *getPCB(int shmid);
 int main(int argc, char *argv[])
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
         break;
     case 2:
         // HPF
+        HPF(processTable,msgq_id1,msgq_id2);
         break;
 
     default:
