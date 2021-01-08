@@ -36,34 +36,46 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
           v->array[i].state = 'S';
           v->array[i].startTime = time;
           v->array[i].waitTime = time - v->array[i].arrivalTime;
+          int first_time =1;
           fprintf(outFile,"At time %d process %d started arr %d total %d remain %d wait %d\n",time,v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,v->array[i].burstTime,v->array[i].waitTime);
           while(getClk()-time< v->array[i].burstTime){
-            // Serve the process
-            int pid = fork();
-            if(pid == 0) {
-              // Serve process
-              char rem[100];
-              sprintf(rem, "%d", v->array[i].burstTime);
-              execlp("./process.out", "./process.out", rem, NULL);
-            }
-            else {
-              v->array[i].pid = pid;
-              message.mtype = pid;
+            if(first_time==1) {
+              first_time = 0;
+              int pid = fork();
+
+              if(pid == 0) {
+                // Serve process
+                char rem[100];
+                sprintf(rem, "%d", v->array[i].burstTime);
+                execlp("./process.out", "./process.out", rem, NULL);
+              }
+              else {
+                v->array[i].pid = pid;
+                message.mtype = pid;
+                msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
+                message.mtype = getpid();
+                msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
+                message.mtype = getpid();
+                kill(pid, SIGSTOP);
+              }
+            }else {
+              kill(v->array[i].pid, SIGCONT );
+              message.mtype = v->array[i].pid;
               msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
               message.mtype = getpid();
               msgrcv(msgqid2, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
               message.mtype = getpid();
-              kill(pid, SIGSTOP);
+              kill(v->array[i].pid, SIGSTOP);
             }
           }
+          int state;
+          waitpid(v->array[i].pid, &state, (int)NULL);
           // Update the process info
           v->array[i].finishTime = getClk();
           time = v->array[i].finishTime;
           v->array[i].state = 'F';
           // Increment the processes counter
           finished+=1;
-          int state;
-          waitpid(v->array[i].pid, &state, (int)NULL);
           fprintf(outFile,"At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n",time,v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,0,v->array[i].waitTime,v->array[i].finishTime-v->array[i].arrivalTime,(v->array[i].finishTime-v->array[i].arrivalTime)/(v->array[i].burstTime*1.0));
           break;
         }
