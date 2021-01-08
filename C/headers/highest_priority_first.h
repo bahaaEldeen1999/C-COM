@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "vector.h"
 #include "headers.h"
 #include "message_buffer.h"
 
 void HPF(vector *v, int msgqid1, int msgqid2) {
-  printf("ffff\n");
   // Sort the vector w.r.t. priority
   sort(v, "priority");
 
@@ -67,6 +65,7 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
           int state;
           waitpid(v->array[i].pid, &state, (int)NULL);
           fprintf(outFile,"At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n",time,v->array[i].ID,v->array[i].arrivalTime,v->array[i].burstTime,0,v->array[i].waitTime,v->array[i].finishTime-v->array[i].arrivalTime,(v->array[i].finishTime-v->array[i].arrivalTime)/(v->array[i].burstTime*1.0));
+          break;
         }
         // If the process not finished and not arrived too skip it
         else {
