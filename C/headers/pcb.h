@@ -1,13 +1,13 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
+// -------------------------------------Helper Functions---------------------------------------------
 typedef struct
 {
-      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime, remainingTime, waitTime;
+      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime, remainingTime, waitTime, index;
       __u_char state;
+      pid_t pid;
 } PCB;
-
-// -------------------------------------Helper Functions---------------------------------------------
-
 void equalize(PCB *x, PCB *y)
 {
       x->arrivalTime = y->arrivalTime;
@@ -17,6 +17,8 @@ void equalize(PCB *x, PCB *y)
       x->lastRunTime = y->lastRunTime;
       x->remainingTime = y->remainingTime;
       x->waitTime = y->waitTime;
+      x->index = y->index;
+      x->pid = y->pid;
       x->ID = y->ID;
       x->priority = y->priority;
       x->state = y->state;
@@ -30,7 +32,7 @@ void swap(PCB *x, PCB *y)
       equalize(x, &tmp);
 }
 
-__uint32_t compare(PCB *x, PCB *y, char sortingKey[])
+__int32_t compare(PCB *x, PCB *y, char sortingKey[])
 {
       if (sortingKey == "arrivalTime")
             return (x->arrivalTime - y->arrivalTime);
