@@ -30,6 +30,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
     while (size(&q) > 0 || curr_index < size(process))
     {
         time = getClk();
+        //printf("time %d\n", time);
         int temp = curr_index;
         for (int i = temp; i < size(process); i++)
         {
@@ -166,7 +167,19 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
             kill(p.pid, SIGCONT);
             waitpid(p.pid, &state, (int)NULL);
         }
-
+        temp = curr_index;
+        for (int i = temp; i < size(process); i++)
+        {
+            if (get(process, i).arrivalTime <= time)
+            {
+                push(&q, get(process, i));
+                curr_index++;
+            }
+            else
+            {
+                break;
+            }
+        }
         if (rem_time > 0)
         {
 
