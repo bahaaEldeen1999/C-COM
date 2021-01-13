@@ -23,7 +23,7 @@ void action_log(FILE *file, PCB *item, char *statement, int clk)
         fprintf(file, "At time %d process %d %s arr %d total %d remain %d wait %d TA %d WTA %lf\n",
                 clk, item->ID, statement, item->arrivalTime, item->burstTime,
                 item->remainingTime, waiting_time, item->burstTime + waiting_time,
-                ((double)item->burstTime + waiting_time) / (item->burstTime));
+                ((float)item->burstTime + waiting_time) / ((float)item->burstTime));
     }
     else
         fprintf(file, "At time %d process %d %s arr %d total %d remain %d wait %d\n",
@@ -69,10 +69,12 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
     float trueTime = 0;
     float totalWTA = 0;
     float totalWait = 0;
-    int numOfProcess = size(v);
+    
+    int first_clk = getClk();
+    int count_done = 0;
 
     //////////////////////////////
-    float *WTA = (float *)malloc(sizeof(float) * (numOfProcess + 1));
+    float *WTA = (float *)malloc(sizeof(float) * (n + 1));
     while (size(v) || size(gotresponse))
     {
         int last_clk = getClk();
@@ -86,6 +88,20 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
             kill(gotresponse->array[cur_proc].pid, SIGCONT);
             waitpid(gotresponse->array[cur_proc].pid, &state, (int)NULL);
             action_log(file, &gotresponse->array[cur_proc], "finished", getClk());
+
+
+            int waiting_time = getClk() + gotresponse->array[cur_proc].remainingTime
+             - (gotresponse->array[cur_proc].arrivalTime + gotresponse->array[cur_proc].burstTime);
+
+            int curWTA = ((float)gotresponse->array[cur_proc].burstTime + waiting_time) / (gotresponse->array[cur_proc].burstTime * 1.0);
+            WTA[count_done] = curWTA;
+            count_done += 1;
+
+            totalWait += waiting_time;
+            totalWTA += curWTA;
+            
+            expectedTime += gotresponse->array[cur_proc].burstTime;
+
             swap(&gotresponse->array[cur_proc], &gotresponse->array[gotresponse->head]);
             pop(gotresponse);
             cur_proc = -1;
@@ -193,15 +209,17 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
     }
 
     // calculating perf file
-    float avgWTA = totalWTA / numOfProcess;
-    float avgWait = totalWait / numOfProcess;
+    trueTime = getClk() - first_clk;
+
+    float avgWTA = totalWTA / n;
+    float avgWait = totalWait / n;
     float cpuUtilize = (expectedTime / trueTime) * 100;
     float stdWTA = 0;
-    for (int i = 0; i < numOfProcess; i++)
+    for (int i = 0; i < n; i++)
     {
         stdWTA += (WTA[i] - avgWTA) * (WTA[i] - avgWTA);
     }
-    stdWTA /= numOfProcess;
+    stdWTA /= n;
     stdWTA = sqrt(stdWTA);
     ///////////////////////
     fprintf(scheduler_perf, "CPU utilization = %.2f%\nAvg WTA = %.2f\nAvg Waiting = %.2f\nstd WTA = %.2f", cpuUtilize, avgWTA, avgWait, stdWTA);
