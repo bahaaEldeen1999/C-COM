@@ -4,10 +4,12 @@
 // -------------------------------------Helper Functions---------------------------------------------
 typedef struct
 {
-      __uint32_t arrivalTime, burstTime, priority, ID, startTime, finishTime, lastRunTime, remainingTime, waitTime, index;
+      __uint32_t arrivalTime, burstTime, priority, ID, startTime,
+          finishTime, lastRunTime, remainingTime, waitTime, index, memorySize, memoryStartIndex, memoryEndIndex;
       __u_char state;
       pid_t pid;
 } PCB;
+
 void equalize(PCB *x, PCB *y)
 {
       x->arrivalTime = y->arrivalTime;
