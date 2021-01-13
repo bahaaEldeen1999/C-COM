@@ -1,0 +1,6 @@
+*.out
+*.txt
+*.log
+*.pref
+*.perf 
+.vscode/
