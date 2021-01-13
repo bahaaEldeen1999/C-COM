@@ -4,6 +4,7 @@
 pid_t scheduler_pid, clock_pid;
 void clearResources(int);
 void initialize_shm_buddy(int);
+void writer(int, vector *);
 
 int main(int argc, char *argv[])
 {
@@ -12,47 +13,47 @@ int main(int argc, char *argv[])
     int shmid_buddy = shmget(shmk_buddy, 1024, IPC_CREAT | 0666);
     initialize_shm_buddy(shmid_buddy);
 
-    // int shmk = ftok("key_process_table", 65);
-    // int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
-    // vector processTable = fileHandler();
-    // writer(shmid, &processTable);
-    // // printf("elm0.id=%d\n", get(&processTable, 0).ID);
+    int shmk = ftok("key_process_table", 65);
+    int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
+    vector processTable = fileHandler();
+    writer(shmid, &processTable);
+    // printf("elm0.id=%d\n", get(&processTable, 0).ID);
 
-    // char algorithmNumber[2], quantum[256];
-    // printf("Enter 0 for RR\nEnter 1 for SRTN\nEnter 2 for HPF\n");
-    // scanf("%c", algorithmNumber);
-    // if (algorithmNumber[0] == '0')
-    // {
-    //     printf("Enter value for quantum\n");
-    //     scanf("%s", quantum);
-    // }
-    // else
-    // {
-    //     strcpy(quantum, "-1");
-    // }
+    char algorithmNumber[2], quantum[256];
+    printf("Enter 0 for RR\nEnter 1 for SRTN\nEnter 2 for HPF\n");
+    scanf("%c", algorithmNumber);
+    if (algorithmNumber[0] == '0')
+    {
+        printf("Enter value for quantum\n");
+        scanf("%s", quantum);
+    }
+    else
+    {
+        strcpy(quantum, "-1");
+    }
 
-    // scheduler_pid = fork();
-    // if (scheduler_pid == 0)
-    // {
-    //     char *args[] = {algorithmNumber, quantum};
-    //     printf("in child 1: %s %s\n", algorithmNumber, quantum);
-    //     execlp("./scheduler.out", "./scheduler.out", algorithmNumber, quantum, NULL);
-    //     //exit(0);
-    // }
+    scheduler_pid = fork();
+    if (scheduler_pid == 0)
+    {
+        char *args[] = {algorithmNumber, quantum};
+        printf("in child 1: %s %s\n", algorithmNumber, quantum);
+        execlp("./scheduler.out", "./scheduler.out", algorithmNumber, quantum, NULL);
+        //exit(0);
+    }
 
-    // clock_pid = fork();
-    // if (clock_pid == 0)
-    // {
-    //     printf("in child 2\n");
-    //     execlp("./clk.out", "./clk.out", NULL);
+    clock_pid = fork();
+    if (clock_pid == 0)
+    {
+        printf("in child 2\n");
+        execlp("./clk.out", "./clk.out", NULL);
 
-    //     //exit(0);
-    // }
-    // initClk();
-    // int x = getClk();
-    // printf("current time is %d\n", x);
+        //exit(0);
+    }
+    initClk();
+    int x = getClk();
+    printf("current time is %d\n", x);
 
-    // destroyClk(false);
+    destroyClk(false);
 }
 
 void clearResources(int signum)
