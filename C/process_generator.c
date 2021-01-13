@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, clearResources);
     int shmk = ftok("key_process_table", 65);
     int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
-    vector processTable = fileHandler(atoi(argv[1]));
+    vector processTable = fileHandler();
     writer(shmid, &processTable);
     // printf("elm0.id=%d\n", get(&processTable, 0).ID);
 
