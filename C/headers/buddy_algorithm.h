@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
+#include "headers.h"
+#include <string.h>
 
 #define MAX_SIZE 512
 
@@ -115,11 +116,10 @@ struct pair allocate(int requiredSize) {
     for(int j=result.start; j<= result.end; j++) {
         memoryArr[j] = '1';
     }
-
     return result;
 }
 
-
+// -------------------------------- Merge any two buddies blocks----------------------------
 void mergeBlocks(int sizeIndex, int blockSize , int startIndex) {
 
     if (sizeIndex >= 9) return;
@@ -196,22 +196,9 @@ void deallocate(int startIndex, int endIndex) {
 
     mergeBlocks(n,blockSize,startIndex);
 }
-
-
-int main() {
+// -------------------------------- Initilize the shared memory----------------------------
+void initialize_shm(int shmid_buddy) {
+    void *shmaddr_buddy = shmat(shmid_buddy, (void *)0, 0);
+    strcpy(memoryArr,(char *)shmaddr_buddy);
     initializeFreeList();
-    struct pair temp =allocate(20);
-    struct pair temp1 =allocate(15);
-    struct pair temp2 =allocate(10);
-    struct pair temp3 =allocate(25);
-    deallocate(temp.start,temp.end);
-    deallocate(temp2.start,temp2.end);
-    struct pair temp4 =allocate(8);
-    struct pair temp5 =allocate(30);
-    deallocate(temp1.start,temp1.end);
-    struct pair temp6 =allocate(15);
-    deallocate(temp4.start,temp4.end);
-    deallocate(temp5.start,temp5.end);
-    deallocate(temp6.start,temp6.end);
-
 }
