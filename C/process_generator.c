@@ -3,13 +3,19 @@
 
 pid_t scheduler_pid, clock_pid;
 void clearResources(int);
+void initialize_shm_buddy(int);
+void writer(int, vector *);
 
 int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
+    int shmk_buddy = ftok("key_buddy", 10);
+    int shmid_buddy = shmget(shmk_buddy, 1024, IPC_CREAT | 0666);
+    initialize_shm_buddy(shmid_buddy);
+
     int shmk = ftok("key_process_table", 65);
     int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
-    vector processTable = fileHandler(atoi(argv[1]));
+    vector processTable = fileHandler();
     writer(shmid, &processTable);
     // printf("elm0.id=%d\n", get(&processTable, 0).ID);
 
@@ -69,5 +75,18 @@ void writer(int shmid, vector *processTable)
     }
 
     printVector((shmaddr));
+    shmdt(shmaddr);
+}
+
+void initialize_shm_buddy(int shmid_buddy)
+{
+    void *shmaddr_buddy = shmat(shmid_buddy, (void *)0, 0);
+    char arr[1024];
+    for (int i = 0; i < 1024; i++)
+    {
+        arr[i] = '0';
+    }
+    strcpy((char *)shmaddr_buddy, arr);
+    printf("%c\n", ((char *)shmaddr_buddy)[10]);
     shmdt(shmaddr);
 }

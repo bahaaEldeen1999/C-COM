@@ -1,5 +1,6 @@
 #pragma once
 #include "vector.h"
+#include <string.h>
 
 void testVectorValidity()
 {
@@ -50,22 +51,43 @@ void testVectorValidity()
       printf("size=%d  should be=0\n", size(&queue));
 }
 
-vector fileHandler(int numberOfProcesses)
+vector fileHandler()
 {
       FILE *file = fopen("processes.txt", "r");
       vector v;
       if (file)
       {
             char line[256];
-            int a, b, c, d;
             PCB input;
+            initialize(&v, 0);
+
             fgets(line, sizeof(line), file);
-            initialize(&v, numberOfProcesses);
-            for (__int32_t i = 0; i < numberOfProcesses; i++)
+            while (fgets(line, sizeof(line), file) != NULL)
             {
-                  fscanf(file, "%d\t%d\t%d\t%d", &a, &b, &c, &d);
-                  input.ID = a, input.arrivalTime = b, input.burstTime = c, input.priority = d, input.state = 'N', input.remainingTime = c, input.startTime = 0, input.finishTime = 0, input.lastRunTime = 0, input.waitTime = 0, input.startTime = -1;
-                  set(&v, i, input);
+                  if (line[0] == '#')
+                        continue;
+
+                  __uint32_t numbers[5], i, iterator = 0, numberIndex = 0;
+                  char *number = malloc(10);
+                  for (i = 0; i < strlen(line); i++)
+                  {
+                        if (line[i] != '\t' && line[i] != '\n')
+                        {
+                              number[iterator++] = line[i];
+                        }
+                        else
+                        {
+                              numbers[numberIndex++] = atoi(number);
+                              iterator = 0;
+                              number = malloc(10);
+                        }
+                  }
+                  input.ID = numbers[0], input.arrivalTime = numbers[1], input.burstTime = numbers[2], input.priority = numbers[3],
+                  input.state = 'N', input.remainingTime = numbers[2], input.startTime = 0, input.finishTime = 0, input.lastRunTime = 0,
+                  input.waitTime = 0, input.startTime = -1, input.memorySize = number[4],
+                  input.memoryStartIndex = 0, input.memoryEndIndex = 0;
+                  push(&v, input);
+                  memset(line, '\0', sizeof(line));
             }
       }
       else
