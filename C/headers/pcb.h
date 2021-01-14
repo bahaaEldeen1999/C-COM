@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 // -------------------------------------Helper Functions---------------------------------------------
+int tmp;
 typedef struct
 {
       __uint32_t arrivalTime, burstTime, priority, ID, startTime,
@@ -24,6 +25,9 @@ void equalize(PCB *x, PCB *y)
       x->ID = y->ID;
       x->priority = y->priority;
       x->state = y->state;
+      x->memoryEndIndex = y->memoryEndIndex;
+      x->memoryStartIndex = y->memoryStartIndex;
+      x->memorySize = y->memorySize;
 }
 
 void swap(PCB *x, PCB *y)
@@ -52,6 +56,6 @@ __int32_t compare(PCB *x, PCB *y, char sortingKey[])
 
 void printPCB(PCB x)
 {
-      printf("#id arrival burst priority start finish state\n");
-      printf("%d\t%d\t%d\t%d\t%d\t%d\t%c\n", x.ID, x.arrivalTime, x.burstTime, x.priority, x.startTime, x.finishTime, x.state);
+      printf("#id  arrival  burst  priority  start  finish  state  memsize\n");
+      printf("%d\t%d\t%d\t%d\t%d\t%d\t%c\t%d\n", x.ID, x.arrivalTime, x.burstTime, x.priority, x.startTime, x.finishTime, x.state, x.memorySize);
 }
