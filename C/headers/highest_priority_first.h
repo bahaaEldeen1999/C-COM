@@ -29,7 +29,6 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
     while(time == -1);
 
     time = getClk();
-    printf("entered %d \n",time);
 
     for (int i=0;i < size(v);i++) {
 
@@ -39,7 +38,7 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
       }
 
       else {   // State == N
-        //printf("size %d \n",v->array[i].memorySize);
+        printf("size %d \n",v->array[i].memorySize);
         // Check if the not finished process arrived
         if(v->array[i].arrivalTime <= time) {
           struct pair memPosition = allocate(v->array[i].memorySize);
