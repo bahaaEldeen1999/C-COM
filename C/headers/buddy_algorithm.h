@@ -41,6 +41,8 @@ struct pair allocate(int requiredSize) {
     //Initilaize the pair with (-1,-1) (not found answer)
     struct pair result = {.start = -1, .end = -1};
 
+    if (requiredSize == 0) return result;
+
     int n = ceil(log(requiredSize) / log(2))-1;
 
 
@@ -201,4 +203,5 @@ void initialize_shm(int shmid_buddy) {
     void *shmaddr_buddy = shmat(shmid_buddy, (void *)0, 0);
     strcpy(memoryArr,(char *)shmaddr_buddy);
     initializeFreeList();
+    printf("finish init \n");
 }
