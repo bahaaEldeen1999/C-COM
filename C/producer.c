@@ -20,17 +20,23 @@ int main()
     int produceIndexId = initSharedMemoryIndexProduced();
     int consumedIndexId = initSharedMemoryIndexConsumed();
 
-    printf("mutexID %d\nemptyID %d\nfullID %d\n", semFullId, semEmptyId, semMutexId);
+    // printf("mutexID %d\nemptyID %d\nfullID %d\n", semFullId, semEmptyId, semMutexId);
     while (1)
     {
+        // check there is space to add more items
         down(semEmptyId);
+        // obtain the lock
         down(semMutexId);
         int x;
         produceItem(buffId, produceIndexId, &x);
-        printf("producing %d...\n", x);
-        sleep(1);
-        printf("produced\n");
+        //printf("producing %d...\n", x);
+        sleep(2);
+        printf("producer: inserted %d\n", x);
+        //printBuffer(buffId);
+        fflush(stdout);
+        // remove lock
         up(semMutexId);
+        // add item produced
         up(semFullId);
     }
 }

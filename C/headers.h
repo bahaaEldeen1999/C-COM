@@ -44,9 +44,7 @@ int initSharedMemoryIndexProduced()
     else
     {
         int *shmaddr = (int *)shmat(shmid, (void *)0, 0);
-        printf("hh %d\n", shmid);
         *shmaddr = 0;
-        printf("gg\n");
         shmdt(shmaddr);
     }
 
@@ -151,7 +149,7 @@ void up(int semid)
         exit(-1);
     }
 }
-
+// add item to buffer and increase full value
 void produceItem(int buffId, int producedIndxId, int *x)
 {
     int *buffer = (int *)shmat(buffId, (void *)0, 0);
@@ -163,7 +161,7 @@ void produceItem(int buffId, int producedIndxId, int *x)
     shmdt(buffer);
     shmdt(producedIndexAddr);
 }
-
+// consume item on buffer and update value
 void consumeItem(int buffId, int consumedIndxId, int *x)
 {
     int *buffer = (int *)shmat(buffId, (void *)0, 0);
@@ -174,4 +172,32 @@ void consumeItem(int buffId, int consumedIndxId, int *x)
     *x = *consumedIndexAddr;
     shmdt(buffer);
     shmdt(consumedIndexAddr);
+}
+void printBuffer(int buffId)
+{
+    int *buffer = (int *)shmat(buffId, (void *)0, 0);
+    for (int i = 0; i < BUF_SIZE; i++)
+    {
+        printf("%d ", buffer[i]);
+    }
+    printf("\n");
+}
+void clearIPCResources()
+{
+    int semFullId = initFullSem();
+    int semEmptyId = initEmptySem();
+    int semMutexId = initMutexSem();
+
+    int buffId = initSharedMemoryBuff();
+    int produceIndexId = initSharedMemoryIndexProduced();
+    int consumedIndexId = initSharedMemoryIndexConsumed();
+
+    // clear IPCs
+    shmctl(buffId, IPC_RMID, (struct shmid_ds *)0);
+    shmctl(produceIndexId, IPC_RMID, (struct shmid_ds *)0);
+    shmctl(consumedIndexId, IPC_RMID, (struct shmid_ds *)0);
+
+    semctl(semFullId, 0, IPC_RMID);
+    semctl(semMutexId, 0, IPC_RMID);
+    semctl(semEmptyId, 0, IPC_RMID);
 }
