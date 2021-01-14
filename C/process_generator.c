@@ -1,7 +1,7 @@
 #include "headers/headers.h"
 #include "headers/file_handler.h"
 #include "headers/buddy_algorithm.h"
-#include <math.h>
+
 
 
 pid_t scheduler_pid, clock_pid;
@@ -93,5 +93,5 @@ void initialize_shm_buddy(int shmid_buddy)
     printf("%c\n", ((char *)shmaddr_buddy)[10]);
     shmdt(shmaddr);
 
-    initialize_shm(shmid_buddy);
+    //initialize_shm(shmid_buddy);
 }

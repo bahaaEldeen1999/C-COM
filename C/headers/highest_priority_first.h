@@ -5,7 +5,16 @@
 #include <math.h>
 #include "buddy_algorithm.h"
 
+freeList freeArr;
+char memoryArr[1024];
+
 void HPF(vector *v, int msgqid1, int msgqid2) {
+
+  int shmk_buddy = ftok("key_buddy", 10);
+  int shmid_buddy = shmget(shmk_buddy, 1024, IPC_CREAT | 0666);
+
+  initialize_shm(shmid_buddy,&memoryArr);
+  initializeFreeList(&freeArr);
   // Sort the vector w.r.t. priority
   sort(v, "priority");
 
@@ -24,11 +33,11 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
 
   // Loop to serve all processes
   while( finished != size(v)) {
-
     // Wait until the clk initialized (for the first time)
     while(time == -1);
 
     time = getClk();
+    printf("%d \n",time);
 
     for (int i=0;i < size(v);i++) {
 
@@ -38,13 +47,13 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
       }
 
       else {   // State == N
-        printf("size %d \n",v->array[i].memorySize);
+        //printf("size %d \n",v->array[i].memorySize+16);
         // Check if the not finished process arrived
         if(v->array[i].arrivalTime <= time) {
-          struct pair memPosition = allocate(v->array[i].memorySize);
+          pair memPosition = allocate(&freeArr,&memoryArr,v->array[i].memorySize);
           //printf("poss %d %d \n",memPosition.start,memPosition.end);
 
-          if(memPosition.start == -1 && memPosition.end == -1) break;
+          if(memPosition.start == -1 && memPosition.end == -1) return;
           else {
             v->array[i].memoryStartIndex = memPosition.start;
             v->array[i].memoryEndIndex = memPosition.end;
@@ -97,8 +106,9 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
           v->array[i].state = 'F';
           // Increment the processes counter
           finished+=1;
-          deallocate(v->array[i].memoryStartIndex,v->array[i].memoryEndIndex);
+          deallocate(&freeArr,&memoryArr,v->array[i].memoryStartIndex,v->array[i].memoryEndIndex);
           fprintf(outFile,"At time %d freed %d bytes from process %d form %d to %d\n",v->array[i].finishTime,memSize,v->array[i].ID,memPosition.start, memPosition.end);
+          printf("helllo\n");
           break;
         }
         // If the process not finished and not arrived too skip it
