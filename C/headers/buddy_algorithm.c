@@ -50,7 +50,7 @@ struct pair allocate(int requiredSize) {
         result.end = freeArr.free[n].pairList[0].end;
 
         // Delete this block from the free memory
-        freeArr.free[n].pairList[0] = freeArr.free[n].pairList[freeArr.free[n].lastIndex];
+        freeArr.free[n].pairList[0] = freeArr.free[n].pairList[freeArr.free[n].lastIndex-1];
         freeArr.free[n].lastIndex -=1;
 
     } else {
@@ -97,11 +97,6 @@ struct pair allocate(int requiredSize) {
             freeArr.free[i].pairList[freeArr.free[i].lastIndex] = pair2;
             freeArr.free[i].lastIndex +=1;
 
-            // for(int j =0;j<freeArr.free[i].lastIndex;j++) {
-            //     printf("%d %d \n", freeArr.free[i].pairList[j].start,freeArr.free[i].pairList[j].end);
-            // }
-
-
             // Save the result
             result.start = freeArr.free[i].pairList[0].start;
             result.end = freeArr.free[i].pairList[0].end;
@@ -110,11 +105,6 @@ struct pair allocate(int requiredSize) {
             // Remove the first block with size i after allocate it
             freeArr.free[i].pairList[0] = freeArr.free[i].pairList[freeArr.free[i].lastIndex-1];
             freeArr.free[i].lastIndex -=1;
-
-            // for(int j =0;j<freeArr.free[i].lastIndex;j++) {
-            //     printf("%d %d \n", freeArr.free[i].pairList[j].start,freeArr.free[i].pairList[j].end);
-            // }
-
 
             i-=1;
         }
@@ -129,26 +119,15 @@ struct pair allocate(int requiredSize) {
     return result;
 }
 
-// -------------------------------- Free process memory------------------------------------
-void deallocate(int startIndex, int endIndex) {
 
-    int blockSize = endIndex - startIndex +1;
-    int n = ceil(log(blockSize)/log(2))-1;
+void mergeBlocks(int sizeIndex, int blockSize , int startIndex) {
 
-    struct pair addedBlock = {.start = startIndex, .end = endIndex };
+    if (sizeIndex >= 9) return;
 
-    freeArr.free[n].pairList[freeArr.free[n].lastIndex] = addedBlock;
-    freeArr.free[n].lastIndex +=1;
-
-    for(int i = startIndex; i<=endIndex;i++) {
-        memoryArr[i] = '0';
-    }
-    printf("Memory freeed from %d to %d \n", startIndex,endIndex);
+    int n = sizeIndex;
     // Merge two blocks if possible
     int buddyNum = startIndex / blockSize;
     int buddyStartAddress;
-
-
 
     // Calculate the buddy address
     if(buddyNum %2 ==0) {
@@ -170,16 +149,12 @@ void deallocate(int startIndex, int endIndex) {
 
         // Buddy is found
         if(freeArr.free[n].pairList[i].start == buddyStartAddress) {
-            //printf("buddy found at %d  me at %d\n" , i,freeArr.free[n].lastIndex);
-            // Calculate the new block start & end depending on buddy position
+            // Calculate the new block start & end depefreeArr.free[n].lastIndexnding on buddy position
             struct pair newPair;
             if(buddyNum %2 == 0) {
 
                 newPair.start = startIndex;
                 newPair.end = startIndex + 2 * blockSize -1;
-
-                // printf("buddy left to me\n");
-                // printf("new pair %d %d \n", newPair.start, newPair.end);
 
             } else {
 
@@ -188,46 +163,55 @@ void deallocate(int startIndex, int endIndex) {
 
             }
 
-            // printf("n+1 before \n");
-            // for(int j =0;j<freeArr.free[n+1].lastIndex;j++) {
-            //     printf("%d %d \n", freeArr.free[n+1].pairList[j].start,freeArr.free[n+1].pairList[j].end);
-            // }
             // Store the new block on the free list of size n+1
             freeArr.free[n+1].pairList[freeArr.free[n+1].lastIndex] = newPair;
             freeArr.free[n+1].lastIndex +=1;
 
+            mergeBlocks(n+1,blockSize*2,newPair.start);
 
-            // printf("n+1 after \n");
-            // for(int j =0;j<freeArr.free[n+1].lastIndex;j++) {
-            // printf("%d %d \n", freeArr.free[n+1].pairList[j].start,freeArr.free[n+1].pairList[j].end);
-            // }
+            // Remove the 2 blocks
+            freeArr.free[n].lastIndex -=1;
+
+            freeArr.free[n].pairList[i] = freeArr.free[n].pairList[freeArr.free[n].lastIndex-1];
+            freeArr.free[n].lastIndex -=1;
+            break;
         }
-
-        // printf("n before \n");
-        // for(int j =0;j<freeArr.free[n].lastIndex;j++) {
-        //     printf("%d %d \n", freeArr.free[n].pairList[j].start,freeArr.free[n].pairList[j].end);
-        // }
-
-        // Remove the 2 blocks
-        freeArr.free[n].lastIndex -=1;
-
-        freeArr.free[n].pairList[i] = freeArr.free[n].pairList[freeArr.free[n].lastIndex-1];
-        freeArr.free[n].lastIndex -=1;
-
-        // printf("n after \n");
-        // for(int j =0;j<freeArr.free[n].lastIndex;j++) {
-        //     printf("%d %d \n", freeArr.free[n].pairList[j].start,freeArr.free[n].pairList[j].end);
-        // }
-        break;
     }
-
 }
+
+// -------------------------------- Free process memory------------------------------------
+void deallocate(int startIndex, int endIndex) {
+
+    int blockSize = endIndex - startIndex +1;
+    int n = ceil(log(blockSize)/log(2))-1;
+    struct pair addedBlock = {.start = startIndex, .end = endIndex };
+
+    freeArr.free[n].pairList[freeArr.free[n].lastIndex] = addedBlock;
+    freeArr.free[n].lastIndex +=1;
+
+    for(int i = startIndex; i<=endIndex;i++) {
+        memoryArr[i] = '0';
+    }
+    printf("Memory freeed from %d to %d \n", startIndex,endIndex);
+
+    mergeBlocks(n,blockSize,startIndex);
+}
+
 
 int main() {
     initializeFreeList();
-    struct pair temp =allocate(16);
+    struct pair temp =allocate(20);
+    struct pair temp1 =allocate(15);
+    struct pair temp2 =allocate(10);
+    struct pair temp3 =allocate(25);
     deallocate(temp.start,temp.end);
-    temp = allocate(16);
-    // temp =allocate(64);
-    // temp =allocate(16);
+    deallocate(temp2.start,temp2.end);
+    struct pair temp4 =allocate(8);
+    struct pair temp5 =allocate(30);
+    deallocate(temp1.start,temp1.end);
+    struct pair temp6 =allocate(15);
+    deallocate(temp4.start,temp4.end);
+    deallocate(temp5.start,temp5.end);
+    deallocate(temp6.start,temp6.end);
+
 }
