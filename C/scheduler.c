@@ -6,6 +6,8 @@
 #include "headers/highest_priority_first.h"
 #include <sys/shm.h>
 vector *getPCB(int shmid);
+
+char *getSharedMemory(int shmid);
 int main(int argc, char *argv[])
 {
     initClk();
@@ -26,23 +28,26 @@ int main(int argc, char *argv[])
     // get PCB
     int algorithmNumber = atoi(argv[1]);
     int quatum = atoi(argv[2]);
+    int shmid_buddy = atoi(argv[3]);
 
-    printf("h1\n");
+    // get shared memory
+    char *shmidArr = getSharedMemory(shmid_buddy);
+    //printf("h1\n");
     vector *processTable = getPCB(shmid);
 
     switch (algorithmNumber)
     {
     case 0:
         // RR
-        roundRobin(processTable, quatum, msgq_id1, msgq_id2);
+        roundRobin(processTable, quatum, msgq_id1, msgq_id2, shmidArr);
         break;
     case 1:
         // SRTN
-        SRTN(processTable, msgq_id1, msgq_id2);
+        SRTN(processTable, msgq_id1, msgq_id2, shmidArr);
         break;
     case 2:
         // HPF
-        HPF(processTable,msgq_id1,msgq_id2);
+        HPF(processTable, msgq_id1, msgq_id2, shmidArr);
         break;
 
     default:
@@ -57,4 +62,10 @@ vector *getPCB(int shmid)
 
     vector *shmaddr = (vector *)shmat(shmid, (void *)0, 0);
     return shmaddr;
+}
+
+char *getSharedMemory(int shmid)
+{
+    char *memAddr = (char *)shmat(shmid, (void *)0, 0);
+    return memAddr;
 }

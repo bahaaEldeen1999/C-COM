@@ -5,21 +5,17 @@
 #include <math.h>
 #include "buddy_algorithm.h"
 
-freeList freeArr;
-char memoryArr[1024];
+void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
+{
 
-void HPF(vector *v, int msgqid1, int msgqid2) {
-
-  int shmk_buddy = ftok("key_buddy", 10);
-  int shmid_buddy = shmget(shmk_buddy, 1024, IPC_CREAT | 0666);
-
-  initialize_shm(shmid_buddy,&memoryArr);
+  freeList freeArr;
   initializeFreeList(&freeArr);
+
   // Sort the vector w.r.t. priority
   sort(v, "priority");
 
   FILE *outFile = fopen("memory.log", "w");
-  fprintf(outFile,"#At time x process y state arr w total z remain y wait k \n");
+  fprintf(outFile, "#At time x process y state arr w total z remain y wait k \n");
 
   // Message Decleration
   struct msgbuff message;
@@ -32,48 +28,60 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
   int time = getClk();
 
   // Loop to serve all processes
-  while( finished != size(v)) {
+  while (finished != size(v))
+  {
     // Wait until the clk initialized (for the first time)
-    while(time == -1);
+    while (time == -1)
+      ;
 
     time = getClk();
-    for (int i=0;i < size(v);i++) {
+    for (int i = 0; i < size(v); i++)
+    {
 
       // Skip the finished processes
-      if (v->array[i].state == 'F') {
+      if (v->array[i].state == 'F')
+      {
         continue;
       }
 
-      else {   // State == N
+      else
+      { // State == N
         // Check if the not finished process arrived
-        if(v->array[i].arrivalTime <= time) {
-          pair memPosition = allocate(&freeArr,&memoryArr,v->array[i].memorySize);
+        if (v->array[i].arrivalTime <= time)
+        {
+          pair memPosition = allocate(&freeArr, memoryArr, v->array[i].memorySize);
 
-          if(memPosition.start == -1 && memPosition.end == -1) break;
-          else {
+          if (memPosition.start == -1 && memPosition.end == -1)
+            break;
+          else
+          {
             v->array[i].memoryStartIndex = memPosition.start;
             v->array[i].memoryEndIndex = memPosition.end;
           }
-          int memSize = memPosition.end -memPosition.start +1;
+          int memSize = memPosition.end - memPosition.start + 1;
           // Update process start time
           v->array[i].state = 'S';
           v->array[i].startTime = time;
           v->array[i].waitTime = time - v->array[i].arrivalTime;
-          int firstTime =1;
+          int firstTime = 1;
 
-          fprintf(outFile,"At time %d allocatd %d bytes for process %d from %d to %d\n",time,memSize,v->array[i].ID,memPosition.start,memPosition.end);
-          while(getClk()-time< v->array[i].burstTime){
-            if(firstTime==1) {
+          fprintf(outFile, "At time %d allocatd %d bytes for process %d from %d to %d\n", time, memSize, v->array[i].ID, memPosition.start, memPosition.end);
+          while (getClk() - time < v->array[i].burstTime)
+          {
+            if (firstTime == 1)
+            {
               firstTime = 0;
               int pid = fork();
 
-              if(pid == 0) {
+              if (pid == 0)
+              {
                 // Serve process
                 char rem[100];
                 sprintf(rem, "%d", v->array[i].burstTime);
                 execlp("./process.out", "./process.out", rem, NULL);
               }
-              else {
+              else
+              {
                 v->array[i].pid = pid;
                 message.mtype = pid;
                 msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
@@ -83,8 +91,9 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
                 kill(pid, SIGSTOP);
               }
             }
-            else {
-              kill(v->array[i].pid, SIGCONT );
+            else
+            {
+              kill(v->array[i].pid, SIGCONT);
               message.mtype = v->array[i].pid;
               msgsnd(msgqid1, &message, sizeof(message.mtext), !IPC_NOWAIT);
               message.mtype = getpid();
@@ -93,24 +102,27 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
               kill(v->array[i].pid, SIGSTOP);
             }
           }
-          kill(v->array[i].pid, SIGCONT );
+          kill(v->array[i].pid, SIGCONT);
           int state;
           waitpid(v->array[i].pid, &state, (int)NULL);
           // Update the process info
           v->array[i].finishTime = getClk();
-          v->array[i].waitTime = v->array[i].finishTime-v->array[i].arrivalTime;
+          v->array[i].waitTime = v->array[i].finishTime - v->array[i].arrivalTime;
           v->array[i].state = 'F';
           // Increment the processes counter
-          finished+=1;
-          deallocate(&freeArr,&memoryArr,v->array[i].memoryStartIndex,v->array[i].memoryEndIndex);
-          fprintf(outFile,"At time %d freed %d bytes from process %d form %d to %d\n",v->array[i].finishTime,memSize,v->array[i].ID,v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
+          finished += 1;
+          deallocate(&freeArr, memoryArr, v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
+          fprintf(outFile, "At time %d freed %d bytes from process %d form %d to %d\n", v->array[i].finishTime, memSize, v->array[i].ID, v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
           break;
         }
         // If the process not finished and not arrived too skip it
-        else {
+        else
+        {
           continue;
         }
       }
     }
   }
+
+  fclose(outFile);
 }

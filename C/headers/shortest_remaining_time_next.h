@@ -48,15 +48,17 @@ int create_new_process(PCB *item)
     }
 }
 
-void SRTN(vector *v, int msgq_id1, int msgq_id2)
+void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
 {
     //printf("***** SRTN *****\n");
-
+    freeList freeArr;
+    initializeFreeList(&freeArr);
     int n = size(v);
     FILE *file = fopen(output_path, "w");
     FILE *scheduler_perf = fopen("./scheduler.perf", "w");
+    FILE *memory_log = fopen("./memory.log", "w");
     fprintf(file, "#At time x process y state arr w total z remain y wait k \n");
-
+    fprintf(memory_log, "#At time x allocated y bytes for process z form i to j \n");
     vector *gotresponse = (vector *)malloc(0);
     initialize(gotresponse, 0);
     int cur_proc = -1;
@@ -82,6 +84,10 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
         {
 
             // Done Process
+            PCB p = v->array[cur_proc];
+            deallocate(&freeArr, memoryArr, p.memoryStartIndex, p.memoryEndIndex);
+            int memSize = p.memoryEndIndex - p.memoryStartIndex + 1;
+            fprintf(memory_log, "At time %d freed %d bytes from process %d form %d to %d\n", getClk(), memSize, p.ID, p.memoryStartIndex, p.memoryEndIndex);
             int state;
             kill(gotresponse->array[cur_proc].pid, SIGCONT);
             waitpid(gotresponse->array[cur_proc].pid, &state, (int)NULL);
@@ -108,6 +114,7 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
             // there is a process running in current time
             if (best_in_v != -1 && gotresponse->array[cur_proc].remainingTime > v->array[best_in_v].remainingTime)
             {
+
                 /* Sigstop to the current process  */
                 gotresponse->array[cur_proc].lastRunTime = getClk();
 
@@ -155,7 +162,10 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
 
             if (v_nxt)
             {
-
+                PCB p = v->array[best_in_v];
+                pair memPosition = allocate(&freeArr, memoryArr, v->array[best_in_v].memorySize);
+                int memSize = memPosition.end - memPosition.start + 1;
+                fprintf(memory_log, "At time %d allocatd %d bytes for process %d from %d to %d\n", getClk(), memSize, p.ID, memPosition.start, memPosition.end);
                 push(gotresponse, v->array[best_in_v]);
                 swap(&v->array[v->head], &v->array[best_in_v]);
                 pop(v);

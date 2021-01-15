@@ -13,15 +13,10 @@
 #include "message_buffer.h"
 #include "buddy_algorithm.h"
 
-freeList freeArr;
-char memoryArr[1024];
-
-void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
+void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2, char *memoryArr)
 {
-    int shmk_buddy = ftok("key_buddy", 10);
-    int shmid_buddy = shmget(shmk_buddy, 1024, IPC_CREAT | 0666);
 
-    initialize_shm(shmid_buddy, &memoryArr);
+    freeList freeArr;
     initializeFreeList(&freeArr);
 
     FILE *outFile = fopen("memory.log", "w");
@@ -70,7 +65,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
         {
 
             // Assign memory
-            pair memPosition = allocate(&freeArr, &memoryArr, p.memorySize);
+            pair memPosition = allocate(&freeArr, memoryArr, p.memorySize);
             if (memPosition.start == -1 && memPosition.end == -1)
             {
                 // if no memory left add the process to end of ready queue so when a free place for it is found we start assigning it to the memory
@@ -235,7 +230,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
             totalWait += p.waitTime;
             totalWTA += (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime);
 
-            deallocate(&freeArr, &memoryArr, p.memoryStartIndex, p.memoryEndIndex);
+            deallocate(&freeArr, memoryArr, p.memoryStartIndex, p.memoryEndIndex);
             int memSize = p.memoryEndIndex - p.memoryStartIndex + 1;
             fprintf(outFile, "At time %d freed %d bytes from process %d form %d to %d\n", time, memSize, p.ID, p.memoryStartIndex, p.memoryEndIndex);
         }
