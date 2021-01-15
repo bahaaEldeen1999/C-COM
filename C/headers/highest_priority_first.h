@@ -49,7 +49,7 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
         if(v->array[i].arrivalTime <= time) {
           pair memPosition = allocate(&freeArr,&memoryArr,v->array[i].memorySize);
 
-          if(memPosition.start == -1 && memPosition.end == -1) return;
+          if(memPosition.start == -1 && memPosition.end == -1) break;
           else {
             v->array[i].memoryStartIndex = memPosition.start;
             v->array[i].memoryEndIndex = memPosition.end;
@@ -113,5 +113,4 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
       }
     }
   }
-  fclose(outFile);
 }
