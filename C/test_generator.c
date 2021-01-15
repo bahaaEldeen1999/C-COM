@@ -30,9 +30,9 @@ int main(int argc, char *argv[])
         //[min-max] = rand() % (max_number + 1 - minimum_number) + minimum_number
         pData.id = i;
         pData.arrivaltime += rand() % (11); //processes arrives in order
-        pData.runningtime = rand() % (30);
+        pData.runningtime = rand() % (30) + 1;
         pData.priority = rand() % (11);
-        pData.memsize = rand() % (255) + 1;
+        pData.memsize = rand() % (255) +1;
         fprintf(pFile, "%d\t%d\t%d\t%d\t%d\n", pData.id, pData.arrivaltime, pData.runningtime, pData.priority, pData.memsize);
     }
     fclose(pFile);

@@ -1,5 +1,6 @@
 #include "headers/headers.h"
 #include "headers/file_handler.h"
+#include "headers/buddy_algorithm.h"
 
 pid_t scheduler_pid, clock_pid;
 void clearResources(int);
@@ -10,9 +11,9 @@ int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
     int shmk_buddy = ftok("key_buddy", 10);
+    // initialize shared memory
     int shmid_buddy = shmget(shmk_buddy, 1024, IPC_CREAT | 0666);
     initialize_shm_buddy(shmid_buddy);
-
     int shmk = ftok("key_process_table", 65);
     int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
     vector processTable = fileHandler();
@@ -35,9 +36,10 @@ int main(int argc, char *argv[])
     scheduler_pid = fork();
     if (scheduler_pid == 0)
     {
-        char *args[] = {algorithmNumber, quantum};
-        printf("in child 1: %s %s\n", algorithmNumber, quantum);
-        execlp("./scheduler.out", "./scheduler.out", algorithmNumber, quantum, NULL);
+        char shmid_buddy_s[100];
+        sprintf(shmid_buddy_s, "%d", shmid_buddy);
+        printf("in child 1: %s %s %s\n", algorithmNumber, quantum, shmid_buddy_s);
+        execlp("./scheduler.out", "./scheduler.out", algorithmNumber, quantum, shmid_buddy_s, NULL);
         //exit(0);
     }
 

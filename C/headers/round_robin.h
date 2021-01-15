@@ -11,8 +11,17 @@
 #include <stdlib.h>
 #include <math.h>
 #include "message_buffer.h"
-void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
+#include "buddy_algorithm.h"
+
+void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2, char *memoryArr)
 {
+
+    freeList freeArr;
+    initializeFreeList(&freeArr);
+
+    FILE *outFile = fopen("memory.log", "w");
+    fprintf(outFile, "#At time x allocated y bytes for process z form i to j \n");
+
     FILE *scheduler_log = fopen("./scheduler.log", "w");
     FILE *scheduler_perf = fopen("./scheduler.perf", "w");
     fprintf(scheduler_log, "#At time x process y state arr w total z remain y wait k \n");
@@ -54,6 +63,25 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
         int firstTime = 0;
         if (p.startTime == -1)
         {
+
+            // Assign memory
+            pair memPosition = allocate(&freeArr, memoryArr, p.memorySize);
+            if (memPosition.start == -1 && memPosition.end == -1)
+            {
+                // if no memory left add the process to end of ready queue so when a free place for it is found we start assigning it to the memory
+                push(&q, p);
+                continue;
+            }
+            else
+            {
+
+                //Update process info
+                p.memoryStartIndex = memPosition.start;
+                p.memoryEndIndex = memPosition.end;
+            }
+
+            int memSize = memPosition.end - memPosition.start + 1;
+            fprintf(outFile, "At time %d allocatd %d bytes for process %d from %d to %d\n", time, memSize, p.ID, memPosition.start, memPosition.end);
             firstTime = 1;
             p.waitTime = time - p.arrivalTime;
             p.startTime = time;
@@ -201,6 +229,10 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
 
             totalWait += p.waitTime;
             totalWTA += (1.0 * (time - p.arrivalTime)) / (float)(1.0 * p.burstTime);
+
+            deallocate(&freeArr, memoryArr, p.memoryStartIndex, p.memoryEndIndex);
+            int memSize = p.memoryEndIndex - p.memoryStartIndex + 1;
+            fprintf(outFile, "At time %d freed %d bytes from process %d form %d to %d\n", time, memSize, p.ID, p.memoryStartIndex, p.memoryEndIndex);
         }
     }
 
@@ -219,4 +251,5 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
     fprintf(scheduler_perf, "CPU utilization = %.2f%\nAvg WTA = %.2f\nAvg Waiting = %.2f\nstd WTA = %.2f", cpuUtilize, avgWTA, avgWait, stdWTA);
     fclose(scheduler_log);
     fclose(scheduler_perf);
+    fclose(outFile);
 }
