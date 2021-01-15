@@ -11,3 +11,4 @@ C/*.txt
 *.log
 scheduler.log
 *.perf
+C/test.c

@@ -31,8 +31,6 @@ typedef struct{
 
 // ----------------------- Initialize the free list of size 1024 with the all memory size------------------------
 void initializeFreeList( freeList *freeArr) {
-    printf("from init \n");
-    printf("%d \n",freeArr->free[9].lastIndex);
     freeArr->free[9].pairList[freeArr->free[9].lastIndex].start=0;
     freeArr->free[9].pairList[freeArr->free[9].lastIndex].end=1023;
     freeArr->free[9].lastIndex +=1;
@@ -40,15 +38,14 @@ void initializeFreeList( freeList *freeArr) {
 
 // -------------------------------- Allocate a memory for a processes with fixed size----------------------------
 pair allocate(freeList *freeArr,char *memoryArr,int requiredSize) {
-printf("free %d \n", freeArr->free[9].lastIndex);
     //Initilaize the pair with (-1,-1) (not found answer)
     pair result = {.start = -1, .end = -1};
 
     if (requiredSize == 0) return result;
 
     int n = ceil(log(requiredSize) / log(2))-1;
+    if (n==-1) n=0;
 
-    printf(" n %d \n",n);
     if(freeArr->free[n].lastIndex > 0) {
 
         // Store start & end index of the memory

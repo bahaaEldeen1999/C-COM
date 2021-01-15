@@ -18,7 +18,7 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
   // Sort the vector w.r.t. priority
   sort(v, "priority");
 
-  FILE *outFile = fopen("scheduler.log", "w");
+  FILE *outFile = fopen("memory.log", "w");
   fprintf(outFile,"#At time x process y state arr w total z remain y wait k \n");
 
   // Message Decleration
@@ -37,8 +37,6 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
     while(time == -1);
 
     time = getClk();
-    printf("%d \n",time);
-
     for (int i=0;i < size(v);i++) {
 
       // Skip the finished processes
@@ -47,18 +45,16 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
       }
 
       else {   // State == N
-        //printf("size %d \n",v->array[i].memorySize+16);
         // Check if the not finished process arrived
         if(v->array[i].arrivalTime <= time) {
           pair memPosition = allocate(&freeArr,&memoryArr,v->array[i].memorySize);
-          //printf("poss %d %d \n",memPosition.start,memPosition.end);
 
           if(memPosition.start == -1 && memPosition.end == -1) return;
           else {
             v->array[i].memoryStartIndex = memPosition.start;
             v->array[i].memoryEndIndex = memPosition.end;
           }
-          int memSize = memPosition.end -memPosition.start;
+          int memSize = memPosition.end -memPosition.start +1;
           // Update process start time
           v->array[i].state = 'S';
           v->array[i].startTime = time;
@@ -107,8 +103,7 @@ void HPF(vector *v, int msgqid1, int msgqid2) {
           // Increment the processes counter
           finished+=1;
           deallocate(&freeArr,&memoryArr,v->array[i].memoryStartIndex,v->array[i].memoryEndIndex);
-          fprintf(outFile,"At time %d freed %d bytes from process %d form %d to %d\n",v->array[i].finishTime,memSize,v->array[i].ID,memPosition.start, memPosition.end);
-          printf("helllo\n");
+          fprintf(outFile,"At time %d freed %d bytes from process %d form %d to %d\n",v->array[i].finishTime,memSize,v->array[i].ID,v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
           break;
         }
         // If the process not finished and not arrived too skip it
