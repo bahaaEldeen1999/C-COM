@@ -54,27 +54,33 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
     freeList freeArr;
     initializeFreeList(&freeArr);
     int n = size(v);
+
+    // Open files
     FILE *file = fopen(output_path, "w");
     FILE *scheduler_perf = fopen("./scheduler.perf", "w");
     FILE *memory_log = fopen("./memory.log", "w");
+
     fprintf(file, "#At time x process y state arr w total z remain y wait k \n");
     fprintf(memory_log, "#At time x allocated y bytes for process z form i to j \n");
+
+    // Init "gotresponse" vector for the comming to work processes
     vector *gotresponse = (vector *)malloc(0);
     initialize(gotresponse, 0);
     int cur_proc = -1;
 
     struct msgbuff msg;
-    //printf("sizeV %d \n", size(v));
 
     // calc perf
     float expectedTime = 0;
     float trueTime = 0;
     float totalWTA = 0;
     float totalWait = 0;
-    int numOfProcess = size(v);
+
+    int first_clk = getClk();
+    int count_done = 0;
 
     //////////////////////////////
-    float *WTA = (float *)malloc(sizeof(float) * (numOfProcess + 1));
+    float *WTA = (float *)malloc(sizeof(float) * (n + 1));
     while (size(v) || size(gotresponse))
     {
         int last_clk = getClk();
@@ -82,16 +88,33 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
 
         if (cur_proc != -1 && gotresponse->array[cur_proc].remainingTime == 0)
         {
-
             // Done Process
-            PCB p = v->array[cur_proc];
-            deallocate(&freeArr, memoryArr, p.memoryStartIndex, p.memoryEndIndex);
-            int memSize = p.memoryEndIndex - p.memoryStartIndex + 1;
-            fprintf(memory_log, "At time %d freed %d bytes from process %d form %d to %d\n", getClk(), memSize, p.ID, p.memoryStartIndex, p.memoryEndIndex);
             int state;
             kill(gotresponse->array[cur_proc].pid, SIGCONT);
             waitpid(gotresponse->array[cur_proc].pid, &state, (int)NULL);
+
+            // Free memory and report about it
+            PCB p = gotresponse->array[cur_proc];
+            deallocate(&freeArr, memoryArr, p.memoryStartIndex, p.memoryEndIndex);
+            int memSize = p.memoryEndIndex - p.memoryStartIndex + 1;
+            fprintf(memory_log, "At time %d freed %d bytes from process %d form %d to %d\n", getClk(), memSize, p.ID, p.memoryStartIndex, p.memoryEndIndex);
+
+            // Report about the done process
             action_log(file, &gotresponse->array[cur_proc], "finished", getClk());
+
+            // calc about .perf
+            int waiting_time = getClk() + gotresponse->array[cur_proc].remainingTime - (gotresponse->array[cur_proc].arrivalTime + gotresponse->array[cur_proc].burstTime);
+
+            int curWTA = ((float)gotresponse->array[cur_proc].burstTime + waiting_time) / (gotresponse->array[cur_proc].burstTime * 1.0);
+            WTA[count_done] = curWTA;
+            count_done += 1;
+
+            totalWait += waiting_time;
+            totalWTA += curWTA;
+
+            expectedTime += gotresponse->array[cur_proc].burstTime;
+
+            // Clean all about this process
             swap(&gotresponse->array[cur_proc], &gotresponse->array[gotresponse->head]);
             pop(gotresponse);
             cur_proc = -1;
@@ -112,26 +135,48 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
         if (cur_proc != -1)
         {
             // there is a process running in current time
+
             if (best_in_v != -1 && gotresponse->array[cur_proc].remainingTime > v->array[best_in_v].remainingTime)
             {
+                // A new comming process has less shorter rem time than the currently working one
 
-                /* Sigstop to the current process  */
-                gotresponse->array[cur_proc].lastRunTime = getClk();
+                // Allocating memory
+                pair memPosition = allocate(&freeArr, memoryArr, v->array[best_in_v].memorySize);
+                if (memPosition.start == -1 && memPosition.end == -1)
+                {
+                    // Move this process away and continue working on the already running process
+                    swap(&v->array[best_in_v], &v->array[v->tail]);
+                }
+                else
+                {
+                    //Update process info
+                    v->array[best_in_v].memoryStartIndex = memPosition.start;
+                    v->array[best_in_v].memoryEndIndex = memPosition.end;
 
-                action_log(file, &gotresponse->array[cur_proc], "stopped", getClk());
+                    int memSize = memPosition.end - memPosition.start + 1;
+                    fprintf(memory_log, "At time %d allocatd %d bytes for process %d from %d to %d\n", getClk(), memSize, v->array[best_in_v].ID, memPosition.start, memPosition.end);
 
-                push(gotresponse, v->array[best_in_v]);
-                swap(&v->array[v->head], &v->array[best_in_v]);
-                pop(v);
-                cur_proc = gotresponse->tail;
+                    /* Sigstop to the current process  */
+                    gotresponse->array[cur_proc].lastRunTime = getClk();
 
-                gotresponse->array[cur_proc].pid = create_new_process(&gotresponse->array[cur_proc]);
+                    action_log(file, &gotresponse->array[cur_proc], "stopped", getClk());
 
-                action_log(file, &gotresponse->array[cur_proc], "started", getClk());
+                    push(gotresponse, v->array[best_in_v]);
+                    swap(&v->array[v->head], &v->array[best_in_v]);
+                    pop(v);
+                    cur_proc = gotresponse->tail;
+
+                    gotresponse->array[cur_proc].pid = create_new_process(&gotresponse->array[cur_proc]);
+
+                    action_log(file, &gotresponse->array[cur_proc], "started", getClk());
+                }
             }
         }
         else
         {
+            // There is no process running this time
+
+            // Looking for the best process to be in action from the processes those worked in past
             int best_in_gotresponse = -1;
             for (int i = gotresponse->head; i <= gotresponse->tail; i++)
             {
@@ -141,6 +186,8 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
             bool v_nxt = 0;
             if (best_in_gotresponse != -1 && best_in_v != -1)
             {
+                // Can be either a new process or a already worked process
+
                 if (gotresponse->array[best_in_gotresponse].remainingTime < v->array[best_in_v].remainingTime)
                     v_nxt = 0;
 
@@ -154,6 +201,7 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
                 v_nxt = 1;
             else
             {
+                // No current working process, no new process and no got-response process will work
                 while (getClk() == last_clk)
                 {
                 }
@@ -162,10 +210,15 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
 
             if (v_nxt)
             {
+                // A new process will take over
+
+                // Get a piece of memory
                 PCB p = v->array[best_in_v];
                 pair memPosition = allocate(&freeArr, memoryArr, v->array[best_in_v].memorySize);
                 int memSize = memPosition.end - memPosition.start + 1;
                 fprintf(memory_log, "At time %d allocatd %d bytes for process %d from %d to %d\n", getClk(), memSize, p.ID, memPosition.start, memPosition.end);
+
+                // Pushing this new process into the got-response queue, it's no more a new process.
                 push(gotresponse, v->array[best_in_v]);
                 swap(&v->array[v->head], &v->array[best_in_v]);
                 pop(v);
@@ -177,10 +230,9 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
             }
             else
             {
+                // A got-response process will take over
                 cur_proc = best_in_gotresponse;
-
-                /* This process that will go into work, is already created, then just wake it up. */
-
+                /* This process that will go into work, is already created, then just wake it up */
                 action_log(file, &gotresponse->array[cur_proc], "resumed", getClk());
             }
         }
@@ -203,15 +255,17 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
     }
 
     // calculating perf file
-    float avgWTA = totalWTA / numOfProcess;
-    float avgWait = totalWait / numOfProcess;
+    trueTime = getClk() - first_clk;
+
+    float avgWTA = totalWTA / n;
+    float avgWait = totalWait / n;
     float cpuUtilize = (expectedTime / trueTime) * 100;
     float stdWTA = 0;
-    for (int i = 0; i < numOfProcess; i++)
+    for (int i = 0; i < n; i++)
     {
         stdWTA += (WTA[i] - avgWTA) * (WTA[i] - avgWTA);
     }
-    stdWTA /= numOfProcess;
+    stdWTA /= n;
     stdWTA = sqrt(stdWTA);
     ///////////////////////
     fprintf(scheduler_perf, "CPU utilization = %.2f%\nAvg WTA = %.2f\nAvg Waiting = %.2f\nstd WTA = %.2f", cpuUtilize, avgWTA, avgWait, stdWTA);
