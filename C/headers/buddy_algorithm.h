@@ -33,10 +33,13 @@ typedef struct
 // ----------------------- Initialize the free list of size 1024 with the all memory size------------------------
 void initializeFreeList(freeList *freeArr)
 {
+    // Initialize all indices to 0 (first free index)
     for (int i = 0; i < 10; i++)
     {
         freeArr->free[i].lastIndex = 0;
     }
+
+    // Add block with size 1024
     freeArr->free[9].pairList[freeArr->free[9].lastIndex].start = 0;
     freeArr->free[9].pairList[freeArr->free[9].lastIndex].end = 1023;
     freeArr->free[9].lastIndex += 1;
@@ -202,17 +205,22 @@ void mergeBlocks(freeList *arr, int sizeIndex, int blockSize, int startIndex)
 // // -------------------------------- Free process memory------------------------------------
 void deallocate(freeList *freeArr, char *memoryArr, int startIndex, int endIndex)
 {
-
+    // Calculate the corresponding n to the block size to add a block to it
     int blockSize = endIndex - startIndex + 1;
     int n = ceil(log(blockSize) / log(2)) - 1;
+
+    // Add the new block to the free list
     pair addedBlock = {.start = startIndex, .end = endIndex};
 
     freeArr->free[n].pairList[freeArr->free[n].lastIndex] = addedBlock;
     freeArr->free[n].lastIndex += 1;
 
+    // Update the shared memory
     for (int i = startIndex; i <= endIndex; i++)
     {
         memoryArr[i] = '0';
     }
+
+    // Try to merge blocks
     mergeBlocks(freeArr, n, blockSize, startIndex);
 }
