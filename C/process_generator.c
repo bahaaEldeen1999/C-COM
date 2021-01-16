@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     {
         char shmid_buddy_s[100];
         sprintf(shmid_buddy_s, "%d", shmid_buddy);
-        printf("in child 1: %s %s %s\n", algorithmNumber, quantum, shmid_buddy_s);
+        //printf("in child 1: %s %s %s\n", algorithmNumber, quantum, shmid_buddy_s);
         execlp("./scheduler.out", "./scheduler.out", algorithmNumber, quantum, shmid_buddy_s, NULL);
         //exit(0);
     }
@@ -46,14 +46,12 @@ int main(int argc, char *argv[])
     clock_pid = fork();
     if (clock_pid == 0)
     {
-        printf("in child 2\n");
+        //printf("in child 2\n");
         execlp("./clk.out", "./clk.out", NULL);
 
         //exit(0);
     }
     initClk();
-    int x = getClk();
-    printf("current time is %d\n", x);
 
     destroyClk(false);
 }
