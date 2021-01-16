@@ -27,7 +27,7 @@ int main(int agrc, char *argv[])
     remainingtime = atoi(argv[1]);
     while (remainingtime > 0)
     {
-        printf("waiting\n");
+        //printf("waiting\n");
         message.mtype = getpid();
         msgrcv(msgq_id1, &message, sizeof(message.mtext), message.mtype, !IPC_NOWAIT);
         int lastTime = getClk();
@@ -39,9 +39,9 @@ int main(int agrc, char *argv[])
         message.mtype = getppid();
         msgsnd(msgq_id2, &message, sizeof(message.mtext), !IPC_NOWAIT);
         message.mtype = getpid();
-        printf("send message \n");
+        // printf("send message \n");
     }
     destroyClk(false);
-    printf("end process\n");
+    //printf("end process\n");
     exit(0);
 }

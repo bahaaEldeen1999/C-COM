@@ -9,7 +9,7 @@ vector *getPCB(int shmid);
 int main(int argc, char *argv[])
 {
     initClk();
-    printf("run sc\n");
+    //printf("run sc\n");
 
     int shmk = ftok("key_process_table", 65);
     int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         break;
     case 2:
         // HPF
-        HPF(processTable,msgq_id1,msgq_id2);
+        HPF(processTable, msgq_id1, msgq_id2);
         break;
 
     default:

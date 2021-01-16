@@ -22,6 +22,7 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
     float trueTime = 0;
     float totalWTA = 0;
     float totalWait = 0;
+    float startTime = getClk();
     int numOfProcess = size(process);
     float *WTA = (float *)malloc(sizeof(float) * (numOfProcess + 1));
     int time = getClk();
@@ -205,9 +206,10 @@ void roundRobin(vector *process, unsigned int quantum, int msgqid1, int msgqid2)
     }
 
     // calculating perf file
+    float totalTime = getClk() - startTime;
     float avgWTA = totalWTA / numOfProcess;
     float avgWait = totalWait / numOfProcess;
-    float cpuUtilize = (expectedTime / trueTime) * 100;
+    float cpuUtilize = (expectedTime / totalTime) * 100;
     float stdWTA = 0;
     for (int i = 0; i < numOfProcess; i++)
     {

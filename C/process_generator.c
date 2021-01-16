@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
     scheduler_pid = fork();
     if (scheduler_pid == 0)
     {
-        char *args[] = {algorithmNumber, quantum};
-        printf("in child 1: %s %s\n", algorithmNumber, quantum);
+        //char *args[] = {algorithmNumber, quantum};
+        //printf("in child 1: %s %s\n", algorithmNumber, quantum);
         execlp("./scheduler.out", "./scheduler.out", algorithmNumber, quantum, NULL);
         //exit(0);
     }
@@ -38,14 +38,12 @@ int main(int argc, char *argv[])
     clock_pid = fork();
     if (clock_pid == 0)
     {
-        printf("in child 2\n");
+        //printf("in child 2\n");
         execlp("./clk.out", "./clk.out", NULL);
 
         //exit(0);
     }
     initClk();
-    int x = getClk();
-    printf("current time is %d\n", x);
 
     destroyClk(false);
 }
