@@ -8,19 +8,22 @@
 vector *getPCB(int shmid);
 
 char *getSharedMemory(int shmid);
+
+void clearIPC(int msgqid1, int msgqid2, int shmid1, int shmid2);
 int main(int argc, char *argv[])
 {
     initClk();
-    printf("run sc\n");
+    // printf("run sc\n");
 
     int shmk = ftok("key_process_table", 65);
     int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
-    printf("shmid %d\n", shmid);
+    //printf("shmid %d\n", shmid);
 
     key_t key_id;
     int msgq_id1, msgq_id2, send_val;
 
     key_id = ftok("keyfile", 65);
+    printf("keyID %d\n", key_id);
     msgq_id1 = msgget(key_id, 0666 | IPC_CREAT);
     msgq_id2 = msgget(key_id + 6, 0666 | IPC_CREAT);
     // shmid = shmget(key_id, 4096, IPC_CREAT | 0644);
@@ -53,7 +56,7 @@ int main(int argc, char *argv[])
     default:
         break;
     }
-
+    clearIPC(msgq_id1, msgq_id2, shmid, shmid_buddy);
     destroyClk(true);
 }
 
@@ -68,4 +71,13 @@ char *getSharedMemory(int shmid)
 {
     char *memAddr = (char *)shmat(shmid, (void *)0, 0);
     return memAddr;
+}
+
+void clearIPC(int msgqid1, int msgqid2, int shmid1, int shmid2)
+{
+    msgctl(msgqid1, IPC_RMID, NULL);
+    msgctl(msgqid2, IPC_RMID, NULL);
+    shmctl(shmid1, IPC_RMID, NULL);
+    shmctl(shmid2, IPC_RMID, NULL);
+    printf("REMOVED IPC\n");
 }

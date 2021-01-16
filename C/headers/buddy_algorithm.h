@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 
-#define MAX_SIZE 512
+#define MAX_SIZE_PAIR 512
 
 typedef struct
 {
@@ -18,7 +18,7 @@ typedef struct
 typedef struct
 {
 
-    pair pairList[MAX_SIZE];
+    pair pairList[MAX_SIZE_PAIR];
     int lastIndex;
 
 } freeSizeList;
