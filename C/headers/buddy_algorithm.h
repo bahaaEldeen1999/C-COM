@@ -30,8 +30,6 @@ typedef struct
 
 } freeList;
 
-//extern struct freeList freeArr;
-
 // ----------------------- Initialize the free list of size 1024 with the all memory size------------------------
 void initializeFreeList(freeList *freeArr)
 {
@@ -75,7 +73,6 @@ pair allocate(freeList *freeArr, char *memoryArr, int requiredSize)
         // Search for bigger available block
         for (i = n + 1; i < 10; i++)
         {
-            //printf("i %d %d \n",i,freeArr->free[i].lastIndex);
             if (freeArr->free[i].lastIndex != 0)
                 break;
         }
@@ -83,7 +80,6 @@ pair allocate(freeList *freeArr, char *memoryArr, int requiredSize)
         // Cannot allocate memory
         if (i == 10)
         {
-            printf("cannot allocate memory\n");
             return result;
         }
 
@@ -128,7 +124,6 @@ pair allocate(freeList *freeArr, char *memoryArr, int requiredSize)
             i -= 1;
         }
     }
-    printf("Allocate memory start %d end %d for %d \n", result.start, result.end, requiredSize);
 
     // Update the memory array
     for (int j = result.start; j <= result.end; j++)
@@ -146,7 +141,6 @@ void mergeBlocks(freeList *arr, int sizeIndex, int blockSize, int startIndex)
     if (sizeIndex >= 9)
         return;
     int n = sizeIndex;
-    //printf("%d \n",arr->free[n].lastIndex);
 
     // Merge two blocks if possible
     int buddyNum = startIndex / blockSize;
@@ -170,7 +164,6 @@ void mergeBlocks(freeList *arr, int sizeIndex, int blockSize, int startIndex)
         buddyStartAddress = startIndex - blockSize;
     }
     // Search for the buddy
-    //printf("%d \n",arr->free[n].lastIndex);
     for (int i = 0; i < arr->free[n].lastIndex; i++)
     {
         // Buddy is found
@@ -222,6 +215,4 @@ void deallocate(freeList *freeArr, char *memoryArr, int startIndex, int endIndex
         memoryArr[i] = '0';
     }
     mergeBlocks(freeArr, n, blockSize, startIndex);
-
-    printf("Memory freeed from %d to %d \n", startIndex, endIndex);
 }

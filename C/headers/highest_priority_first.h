@@ -15,7 +15,10 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
   sort(v, "priority");
 
   FILE *outFile = fopen("memory.log", "w");
-  fprintf(outFile, "#At time x process y state arr w total z remain y wait k \n");
+  fprintf(outFile, "#At time x allocated y bytes for process z form i to j \n");
+
+  FILE *sheduler = fopen("scheduler.log", "w");
+  fprintf(sheduler, "#At time x process y state arr w total z remain y wait k \n");
 
   // Message Decleration
   struct msgbuff message;
@@ -26,6 +29,15 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
   // number of finished processes
   int finished = 0;
   int time = getClk();
+
+ // Some variables for .pref calculations
+  float startTime = getClk();
+  float expectedTime = 0;
+  float trueTime = 0;
+  float totalWTA = 0;
+  float totalWait = 0;
+  int numOfProcess = size(v);
+  float *WTA = (float *)malloc(sizeof(float) * (numOfProcess + 1));
 
   // Loop to serve all processes
   while (finished != size(v))
@@ -65,7 +77,9 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
           v->array[i].waitTime = time - v->array[i].arrivalTime;
           int firstTime = 1;
 
+          expectedTime += v->array[i].burstTime;
           fprintf(outFile, "At time %d allocatd %d bytes for process %d from %d to %d\n", time, memSize, v->array[i].ID, memPosition.start, memPosition.end);
+          fprintf(sheduler, "At time %d process %d started arr %d total %d remain %d wait %d\n", time, v->array[i].ID, v->array[i].arrivalTime, v->array[i].burstTime, v->array[i].burstTime, v->array[i].waitTime);
           while (getClk() - time < v->array[i].burstTime)
           {
             if (firstTime == 1)
@@ -107,12 +121,16 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
           waitpid(v->array[i].pid, &state, (int)NULL);
           // Update the process info
           v->array[i].finishTime = getClk();
-          v->array[i].waitTime = v->array[i].finishTime - v->array[i].arrivalTime;
           v->array[i].state = 'F';
           // Increment the processes counter
           finished += 1;
+          int TA = v->array[i].finishTime - v->array[i].arrivalTime;
           deallocate(&freeArr, memoryArr, v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
+          fprintf(sheduler, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n", v->array[i].finishTime, v->array[i].ID, v->array[i].arrivalTime, v->array[i].burstTime, 0, v->array[i].waitTime, TA, TA / (v->array[i].burstTime * 1.0));
           fprintf(outFile, "At time %d freed %d bytes from process %d form %d to %d\n", v->array[i].finishTime, memSize, v->array[i].ID, v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
+          trueTime += (getClk() - time);
+          totalWait += v->array[i].waitTime;
+          totalWTA += TA / (v->array[i].burstTime * 1.0);
           break;
         }
         // If the process not finished and not arrived too skip it
@@ -125,4 +143,21 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
   }
 
   fclose(outFile);
+  fclose(sheduler);
+  FILE *scheduler_perf = fopen("scheduler.perf", "w");
+  // calculating perf file
+  float totalTime = getClk() - startTime;
+  float avgWTA = totalWTA / numOfProcess;
+  float avgWait = totalWait / numOfProcess;
+  float cpuUtilize = (expectedTime / totalTime) * 100;
+  float stdWTA = 0;
+  for (int i = 0; i < numOfProcess; i++)
+  {
+    stdWTA += (WTA[i] - avgWTA) * (WTA[i] - avgWTA);
+  }
+  stdWTA /= numOfProcess;
+  stdWTA = sqrt(stdWTA);
+  ///////////////////////
+  fprintf(scheduler_perf, "CPU utilization = %.2f%\nAvg WTA = %.2f\nAvg Waiting = %.2f\nstd WTA = %.2f", cpuUtilize, avgWTA, avgWait, stdWTA);
+  fclose(scheduler_perf);
 }

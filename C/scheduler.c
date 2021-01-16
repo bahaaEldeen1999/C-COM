@@ -13,20 +13,16 @@ void clearIPC(int msgqid1, int msgqid2, int shmid1, int shmid2);
 int main(int argc, char *argv[])
 {
     initClk();
-    // printf("run sc\n");
 
     int shmk = ftok("key_process_table", 65);
     int shmid = shmget(shmk, 4096, IPC_CREAT | 0666);
-    //printf("shmid %d\n", shmid);
 
     key_t key_id;
     int msgq_id1, msgq_id2, send_val;
 
     key_id = ftok("keyfile", 65);
-    printf("keyID %d\n", key_id);
     msgq_id1 = msgget(key_id, 0666 | IPC_CREAT);
     msgq_id2 = msgget(key_id + 6, 0666 | IPC_CREAT);
-    // shmid = shmget(key_id, 4096, IPC_CREAT | 0644);
 
     // get PCB
     int algorithmNumber = atoi(argv[1]);
@@ -35,7 +31,6 @@ int main(int argc, char *argv[])
 
     // get shared memory
     char *shmidArr = getSharedMemory(shmid_buddy);
-    //printf("h1\n");
     vector *processTable = getPCB(shmid);
 
     switch (algorithmNumber)
@@ -79,5 +74,4 @@ void clearIPC(int msgqid1, int msgqid2, int shmid1, int shmid2)
     msgctl(msgqid2, IPC_RMID, NULL);
     shmctl(shmid1, IPC_RMID, NULL);
     shmctl(shmid2, IPC_RMID, NULL);
-    printf("REMOVED IPC\n");
 }
