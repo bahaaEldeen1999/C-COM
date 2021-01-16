@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     int msgq_id1, msgq_id2, send_val;
 
     key_id = ftok("keyfile", 65);
+    //printf("keyID %d\n", key_id);
     msgq_id1 = msgget(key_id, 0666 | IPC_CREAT);
     msgq_id2 = msgget(key_id + 6, 0666 | IPC_CREAT);
 

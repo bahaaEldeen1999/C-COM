@@ -35,7 +35,7 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
   //Store the current clock at time
   int time = getClk();
 
- // Some variables for .pref calculations
+  // Some variables for .pref calculations
   float startTime = getClk();
   float expectedTime = 0;
   float trueTime = 0;
@@ -49,7 +49,8 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
   {
 
     // Wait until the clk initialized (for the first time)
-    while (time == -1);
+    while (time == -1)
+      ;
 
     // Update time
     time = getClk();
@@ -78,7 +79,6 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
             v->array[i].memoryEndIndex = memPosition.end;
           }
           int memSize = memPosition.end - memPosition.start + 1;
-  
           // Update process info
           v->array[i].state = 'S';
           v->array[i].startTime = time;
@@ -142,7 +142,6 @@ void HPF(vector *v, int msgqid1, int msgqid2, char *memoryArr)
           // out the info to the files
           fprintf(scheduler, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n", v->array[i].finishTime, v->array[i].ID, v->array[i].arrivalTime, v->array[i].burstTime, 0, v->array[i].waitTime, TA, TA / (v->array[i].burstTime * 1.0));
           fprintf(outFile, "At time %d freed %d bytes from process %d form %d to %d\n", v->array[i].finishTime, memSize, v->array[i].ID, v->array[i].memoryStartIndex, v->array[i].memoryEndIndex);
-          
           // .pref calculations
           trueTime += (getClk() - time);
           totalWait += v->array[i].waitTime;
