@@ -20,7 +20,7 @@ void action_log(FILE *file, PCB *item, char *statement, int clk)
 
     if (statement == "finished")
     {
-        fprintf(file, "At time %d process %d %s arr %d total %d remain %d wait %d TA %d WTA %lf\n",
+        fprintf(file, "At time %d process %d %s arr %d total %d remain %d wait %d TA %d WTA %.2f\n",
                 clk, item->ID, statement, item->arrivalTime, item->burstTime,
                 item->remainingTime, waiting_time, item->burstTime + waiting_time,
                 ((double)item->burstTime + waiting_time) / (item->burstTime));
@@ -51,43 +51,62 @@ int create_new_process(PCB *item)
 void SRTN(vector *v, int msgq_id1, int msgq_id2)
 {
     //printf("***** SRTN *****\n");
-
     int n = size(v);
+
+    // Open files
     FILE *file = fopen(output_path, "w");
     FILE *scheduler_perf = fopen("./scheduler.perf", "w");
+
     fprintf(file, "#At time x process y state arr w total z remain y wait k \n");
 
-    vector *gotresponse = (vector *)malloc(0);
-    initialize(gotresponse, 0);
+    // Init "gotresponse" vector for the comming to work processes
+    vector gotresponse; // = (vector *)malloc(0);
+    initialize(&gotresponse, 0);
     int cur_proc = -1;
 
     struct msgbuff msg;
-    //printf("sizeV %d \n", size(v));
 
     // calc perf
     float expectedTime = 0;
     float trueTime = 0;
     float totalWTA = 0;
     float totalWait = 0;
-    int numOfProcess = size(v);
 
+    int first_clk = getClk();
+    int count_done = 0;
+    float startTime = getClk();
     //////////////////////////////
-    float *WTA = (float *)malloc(sizeof(float) * (numOfProcess + 1));
-    while (size(v) || size(gotresponse))
+    float *WTA = (float *)malloc(sizeof(float) * (n + 1));
+    while (size(v) || size(&gotresponse))
     {
         int last_clk = getClk();
         //printf("CLK is : %d\n", getClk());
 
-        if (cur_proc != -1 && gotresponse->array[cur_proc].remainingTime == 0)
+        if (cur_proc != -1 && gotresponse.array[cur_proc].remainingTime == 0)
         {
-
             // Done Process
             int state;
-            kill(gotresponse->array[cur_proc].pid, SIGCONT);
-            waitpid(gotresponse->array[cur_proc].pid, &state, (int)NULL);
-            action_log(file, &gotresponse->array[cur_proc], "finished", getClk());
-            swap(&gotresponse->array[cur_proc], &gotresponse->array[gotresponse->head]);
-            pop(gotresponse);
+            kill(gotresponse.array[cur_proc].pid, SIGCONT);
+            waitpid(gotresponse.array[cur_proc].pid, &state, (int)NULL);
+
+            // Report about the done process
+            action_log(file, &gotresponse.array[cur_proc], "finished", getClk());
+
+            // calc about .perf
+            int waiting_time = getClk() + gotresponse.array[cur_proc].remainingTime - (gotresponse.array[cur_proc].arrivalTime + gotresponse.array[cur_proc].burstTime);
+
+            int curWTA = ((float)gotresponse.array[cur_proc].burstTime + waiting_time) / (gotresponse.array[cur_proc].burstTime * 1.0);
+            WTA[count_done] = curWTA;
+            count_done += 1;
+
+            totalWait += waiting_time;
+            totalWTA += curWTA;
+
+            expectedTime += gotresponse.array[cur_proc].burstTime;
+
+            // Clean all about this process
+            swap(&gotresponse.array[cur_proc], &gotresponse.array[gotresponse.head]);
+            pop(&gotresponse);
             cur_proc = -1;
         }
 
@@ -106,35 +125,43 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
         if (cur_proc != -1)
         {
             // there is a process running in current time
-            if (best_in_v != -1 && gotresponse->array[cur_proc].remainingTime > v->array[best_in_v].remainingTime)
+
+            if (best_in_v != -1 && gotresponse.array[cur_proc].remainingTime > v->array[best_in_v].remainingTime)
             {
+                // A new comming process has less shorter rem time than the currently working one
+
                 /* Sigstop to the current process  */
-                gotresponse->array[cur_proc].lastRunTime = getClk();
+                gotresponse.array[cur_proc].lastRunTime = getClk();
 
-                action_log(file, &gotresponse->array[cur_proc], "stopped", getClk());
+                action_log(file, &gotresponse.array[cur_proc], "stopped", getClk());
 
-                push(gotresponse, v->array[best_in_v]);
+                push(&gotresponse, v->array[best_in_v]);
                 swap(&v->array[v->head], &v->array[best_in_v]);
                 pop(v);
-                cur_proc = gotresponse->tail;
+                cur_proc = gotresponse.tail;
 
-                gotresponse->array[cur_proc].pid = create_new_process(&gotresponse->array[cur_proc]);
+                gotresponse.array[cur_proc].pid = create_new_process(&gotresponse.array[cur_proc]);
 
-                action_log(file, &gotresponse->array[cur_proc], "started", getClk());
+                action_log(file, &gotresponse.array[cur_proc], "started", getClk());
             }
         }
         else
         {
+            // There is no process running this time
+
+            // Looking for the best process to be in action from the processes those worked in past
             int best_in_gotresponse = -1;
-            for (int i = gotresponse->head; i <= gotresponse->tail; i++)
+            for (int i = gotresponse.head; i <= gotresponse.tail; i++)
             {
-                if (best_in_gotresponse == -1 || gotresponse->array[i].remainingTime < gotresponse->array[best_in_gotresponse].remainingTime)
+                if (best_in_gotresponse == -1 || gotresponse.array[i].remainingTime < gotresponse.array[best_in_gotresponse].remainingTime)
                     best_in_gotresponse = i;
             }
             bool v_nxt = 0;
             if (best_in_gotresponse != -1 && best_in_v != -1)
             {
-                if (gotresponse->array[best_in_gotresponse].remainingTime < v->array[best_in_v].remainingTime)
+                // Can be either a new process or a already worked process
+
+                if (gotresponse.array[best_in_gotresponse].remainingTime < v->array[best_in_v].remainingTime)
                     v_nxt = 0;
 
                 else
@@ -147,6 +174,7 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
                 v_nxt = 1;
             else
             {
+                // No current working process, no new process and no got-response process will work
                 while (getClk() == last_clk)
                 {
                 }
@@ -155,30 +183,31 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
 
             if (v_nxt)
             {
+                // A new process will take over
 
-                push(gotresponse, v->array[best_in_v]);
+                // Pushing this new process into the got-response queue, it's no more a new process.
+                push(&gotresponse, v->array[best_in_v]);
                 swap(&v->array[v->head], &v->array[best_in_v]);
                 pop(v);
 
-                cur_proc = gotresponse->tail;
+                cur_proc = gotresponse.tail;
 
-                gotresponse->array[cur_proc].pid = create_new_process(&gotresponse->array[cur_proc]);
-                action_log(file, &gotresponse->array[cur_proc], "started", getClk());
+                gotresponse.array[cur_proc].pid = create_new_process(&gotresponse.array[cur_proc]);
+                action_log(file, &gotresponse.array[cur_proc], "started", getClk());
             }
             else
             {
+                // A got-response process will take over
                 cur_proc = best_in_gotresponse;
-
-                /* This process that will go into work, is already created, then just wake it up. */
-
-                action_log(file, &gotresponse->array[cur_proc], "resumed", getClk());
+                /* This process that will go into work, is already created, then just wake it up */
+                action_log(file, &gotresponse.array[cur_proc], "resumed", getClk());
             }
         }
 
-        kill(gotresponse->array[cur_proc].pid, SIGCONT);
+        kill(gotresponse.array[cur_proc].pid, SIGCONT);
 
         // If reaches here, then there is a running process.
-        msg.mtype = gotresponse->array[cur_proc].pid;
+        msg.mtype = gotresponse.array[cur_proc].pid;
         //printf("Parent sending to procss id: %ld\n", msg.mtype);
         msgsnd(msgq_id1, &msg, sizeof(msg.mtext), !IPC_NOWAIT);
 
@@ -187,27 +216,27 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2)
         msgrcv(msgq_id2, &msg, sizeof(msg.mtext), msg.mtype, !IPC_NOWAIT);
         //printf("Parent got from procss id: %d\n", gotresponse->array[cur_proc].pid);
 
-        kill(gotresponse->array[cur_proc].pid, SIGSTOP);
+        kill(gotresponse.array[cur_proc].pid, SIGSTOP);
 
-        gotresponse->array[cur_proc].remainingTime--;
+        gotresponse.array[cur_proc].remainingTime--;
     }
 
     // calculating perf file
-    float avgWTA = totalWTA / numOfProcess;
-    float avgWait = totalWait / numOfProcess;
-    float cpuUtilize = (expectedTime / trueTime) * 100;
+    float totalTime = getClk() - startTime;
+
+    float avgWTA = totalWTA / n;
+    float avgWait = totalWait / n;
+    float cpuUtilize = (expectedTime / totalTime) * 100;
     float stdWTA = 0;
-    for (int i = 0; i < numOfProcess; i++)
+    for (int i = 0; i < n; i++)
     {
         stdWTA += (WTA[i] - avgWTA) * (WTA[i] - avgWTA);
     }
-    stdWTA /= numOfProcess;
+    stdWTA /= n;
     stdWTA = sqrt(stdWTA);
     ///////////////////////
     fprintf(scheduler_perf, "CPU utilization = %.2f%\nAvg WTA = %.2f\nAvg Waiting = %.2f\nstd WTA = %.2f", cpuUtilize, avgWTA, avgWait, stdWTA);
     fclose(scheduler_perf);
 
     fclose(file);
-
-    // printf("Done\n");
 }
