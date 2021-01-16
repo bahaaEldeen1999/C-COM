@@ -1,40 +1,8 @@
-process = [
-    {
-        "id": 0,
-        "start": 0,
-        "finish": 2,
-        "started": 0,
-        "runtime": 2
-    },
-    {
-        "id": 1,
-        "start": 0,
-        "finish": 4,
-        "started": 0,
-        "runtime": 4
-    },
-    {
-        "id": 2,
-        "start": 1,
-        "finish": 6,
-        "started": 0,
-        "runtime": 5
-    },
-    {
-        "id": 3,
-        "start": 2,
-        "finish": 9,
-        "started": 0,
-        "runtime": 9
-    },
-    {
-        "id": 4,
-        "start": 8,
-        "finish": 19,
-        "started": 0,
-        "runtime": 7
-    }
-]
+
+from fileHandler import *
+
+process = fileHandler()
+# print(process)
 
 
 def round_robin(process, quantum):
@@ -43,7 +11,7 @@ def round_robin(process, quantum):
     q.append(process[0])
     time = q[0]["start"]
     remaining_time = []
-    remaining_time.append(q[0]["finish"]-q[0]["start"])
+    remaining_time.append(q[0]["runtime"])
     curr_index = 1
     while len(q) != 0 or curr_index < len(process):
         temp = curr_index
@@ -74,7 +42,15 @@ def round_robin(process, quantum):
         else:
             time += rem_time
             rem_time = 0
-        # p  rint("rem time ")
+        #print("rem time ", rem_time)
+        temp = curr_index
+        for i in range(temp, len(process)):
+            if process[i]["start"] <= time:
+                q.append(process[i])
+                remaining_time.append(process[i]["runtime"])
+                curr_index += 1
+            else:
+                break
         if rem_time > 0:
             p["started"] = 1
             p["last"] = time
@@ -87,4 +63,4 @@ def round_robin(process, quantum):
                 p["runtime"])+" remain "+str(rem_time)+" wait "+str(p["wait"])+" TA "+str(time-p["start"])+" WTA "+str(round((time-p["start"])/(p["runtime"]), 2)))
 
 
-round_robin(process, 2)
+round_robin(process, 3)

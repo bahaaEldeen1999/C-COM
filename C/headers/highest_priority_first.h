@@ -103,14 +103,15 @@ void HPF(vector *v, int msgqid1, int msgqid2)
           waitpid(v->array[i].pid, &state, (int)NULL);
           // Update the process info
           v->array[i].finishTime = getClk();
-          v->array[i].waitTime = v->array[i].finishTime - v->array[i].arrivalTime;
           v->array[i].state = 'F';
           // Increment the processes counter
           finished += 1;
-          fprintf(outFile, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n", v->array[i].finishTime, v->array[i].ID, v->array[i].arrivalTime, v->array[i].burstTime, 0, v->array[i].waitTime, v->array[i].waitTime, v->array[i].waitTime / (v->array[i].burstTime * 1.0));
+          int TA = v->array[i].finishTime - v->array[i].arrivalTime;
+
+          fprintf(outFile, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f \n", v->array[i].finishTime, v->array[i].ID, v->array[i].arrivalTime, v->array[i].burstTime, 0, v->array[i].waitTime, TA, TA / (v->array[i].burstTime * 1.0));
           trueTime += (getClk() - time);
           totalWait += v->array[i].waitTime;
-          totalWTA += v->array[i].waitTime / (v->array[i].burstTime * 1.0);
+          totalWTA += TA / (v->array[i].burstTime * 1.0);
           break;
         }
         // If the process not finished and not arrived too skip it
