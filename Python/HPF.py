@@ -38,6 +38,7 @@ def HPF(processes, path="../schedulerp.log"):
                     process['finish']-process['start'],
                     WTA if WTA > int(WTA) else int(WTA)))
                 process_queue.remove(process)
+                break
         if not servied:
             time += 1
 

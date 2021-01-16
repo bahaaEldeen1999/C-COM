@@ -3,7 +3,7 @@
 
 pid_t scheduler_pid, clock_pid;
 void clearResources(int);
-
+void writer(int shmid, vector *processTable);
 int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);

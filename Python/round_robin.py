@@ -63,4 +63,4 @@ def round_robin(process, quantum):
                 p["runtime"])+" remain "+str(rem_time)+" wait "+str(p["wait"])+" TA "+str(time-p["start"])+" WTA "+str(round((time-p["start"])/(p["runtime"]), 2)))
 
 
-round_robin(process, 3)
+round_robin(process, 5)

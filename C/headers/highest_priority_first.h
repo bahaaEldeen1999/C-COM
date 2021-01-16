@@ -8,7 +8,6 @@ void HPF(vector *v, int msgqid1, int msgqid2)
 {
   // Sort the vector w.r.t. priority
   sort(v, "priority");
-
   FILE *outFile = fopen("scheduler.log", "w");
   fprintf(outFile, "#At time x process y state arr w total z remain y wait k \n");
 
