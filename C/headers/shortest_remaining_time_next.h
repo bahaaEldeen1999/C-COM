@@ -64,7 +64,7 @@ void SRTN(vector *v, int msgq_id1, int msgq_id2, char *memoryArr)
     fprintf(memory_log, "#At time x allocated y bytes for process z form i to j \n");
 
     // Init "gotresponse" vector for the comming to work processes
-    vector gotresponse; // = (vector *)malloc(0);
+    vector gotresponse;
     initialize(&gotresponse, 0);
     int cur_proc = -1;
 
