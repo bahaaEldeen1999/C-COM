@@ -28,11 +28,19 @@
 
 1.  ### For scheduler and memory manager
 
-        cd scheduler # or memory_manager make ./test_generator.out # then enter any number of processes ./process_generator.out
+        cd scheduler              # or memory_manager 
+        make 
+        ./test_generator.out      # then enter any number of processes 
+        ./process_generator.out
 
 2.  ### For producer consumer
 
-        cd producer_consumer gcc -std=c11 producer.c -o producer.out gcc -std=c11 consumer.c -o consumer.out gcc -std=c11 clear_ipc.c -o clear_ipc.out ./producer.out ./consumer.out
+        cd producer_consumer 
+        gcc -std=c11 producer.c -o producer.out 
+        gcc -std=c11 consumer.c -o consumer.out 
+        gcc -std=c11 clear_ipc.c -o clear_ipc.out 
+        ./producer.out 
+        ./consumer.out
 
 ## File Structure
 
@@ -85,7 +93,7 @@
     │   ├── clear_ipc.c
     │   ├── consumer.c
     │   ├── producer.c
-    │   ├── headers.h
+    └── ├── headers.h
 
 ## Contributors
 
