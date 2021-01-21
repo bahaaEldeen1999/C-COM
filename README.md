@@ -89,7 +89,7 @@
 
 ## Contributors
 
-> This project was the semester project in 3rd year computer engineering. it is implemented by:
+> **This project was the semester project of _operating systems_ course in 3rd year computer engineering. it is implemented by:**
 
 <table>
   <tr>
