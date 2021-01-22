@@ -1,15 +1,15 @@
 # Operating Systems common applications
 <div align="center">
   
-  [![GitHub contributors](https://img.shields.io/github/contributors/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/contributors)
-  [![GitHub issues](https://img.shields.io/github/issues/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/issues)
-  [![GitHub forks](https://img.shields.io/github/forks/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/network)
-  [![GitHub stars](https://img.shields.io/github/stars/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/stargazers)
-  [![GitHub license](https://img.shields.io/github/license/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/blob/master/LICENSE)
-  <img src="https://img.shields.io/github/languages/count/bahaaEldeen1999/OS_PROJECT" />
-  <img src="https://img.shields.io/github/languages/top/bahaaEldeen1999/OS_PROJECT" />
-  <img src="https://img.shields.io/github/languages/code-size/bahaaEldeen1999/OS_PROJECT" />
-  <img src="https://img.shields.io/github/issues-pr-raw/AbahaaEldeen1999/OS_PROJECT" />
+  [![GitHub contributors](https://img.shields.io/github/contributors/bahaaEldeen1999/C-COM)](https://github.com/bahaaEldeen1999/C-COM/contributors)
+  [![GitHub issues](https://img.shields.io/github/issues/bahaaEldeen1999/C-COM)](https://github.com/bahaaEldeen1999/C-COM/issues)
+  [![GitHub forks](https://img.shields.io/github/forks/bahaaEldeen1999/C-COM)](https://github.com/bahaaEldeen1999/C-COM/network)
+  [![GitHub stars](https://img.shields.io/github/stars/bahaaEldeen1999/C-COM)](https://github.com/bahaaEldeen1999/C-COM/stargazers)
+  [![GitHub license](https://img.shields.io/github/license/bahaaEldeen1999/C-COM)](https://github.com/bahaaEldeen1999/C-COM/blob/master/LICENSE)
+  <img src="https://img.shields.io/github/languages/count/bahaaEldeen1999/C-COM" />
+  <img src="https://img.shields.io/github/languages/top/bahaaEldeen1999/C-COM" />
+  <img src="https://img.shields.io/github/languages/code-size/bahaaEldeen1999/C-COM" />
+  <img src="https://img.shields.io/github/issues-pr-raw/AbahaaEldeen1999/C-COM" />
 
 </div>
 ## About the project
