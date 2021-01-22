@@ -1,10 +1,22 @@
 # Operating Systems common applications
+<div align="center">
+  
+  [![GitHub contributors](https://img.shields.io/github/contributors/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/contributors)
+  [![GitHub issues](https://img.shields.io/github/issues/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/issues)
+  [![GitHub forks](https://img.shields.io/github/forks/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/network)
+  [![GitHub stars](https://img.shields.io/github/stars/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/stargazers)
+  [![GitHub license](https://img.shields.io/github/license/bahaaEldeen1999/OS_PROJECT)](https://github.com/bahaaEldeen1999/OS_PROJECT/blob/master/LICENSE)
+  <img src="https://img.shields.io/github/languages/count/bahaaEldeen1999/OS_PROJECT" />
+  <img src="https://img.shields.io/github/languages/top/bahaaEldeen1999/OS_PROJECT" />
+  <img src="https://img.shields.io/github/languages/code-size/bahaaEldeen1999/OS_PROJECT" />
+  <img src="https://img.shields.io/github/issues-pr-raw/AbahaaEldeen1999/OS_PROJECT" />
 
+</div>
 ## About the project
 
 -   **The project contains three main concepts used in any operating system which are process scheduling, memory managemnt using buddy algorithm, and producer consumer problem**
 
--   **It is implemented in _C_ (standard 11) and uses _cmake_ for compilation**
+-   **It is implemented in _C_ (standard 11) and uses _make_ for compilation**
 
 -   **More explaination for the details of each module and example test cases can be found in the project documentation**
 
