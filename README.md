@@ -63,6 +63,7 @@
         gcc -std=c11 clear_ipc.c -o clear_ipc.out 
         ./producer.out 
         ./consumer.out
+        ./clear_ipc.out    # run this after finish testing to clear resources
 
 ## File Structure
 
@@ -70,7 +71,6 @@
     ├── README.md
     ├── LICENSE
     ├── .gitignore
-    ├── documentation.pdf
     └── scheduler
     │   ├── headers
     │   │   ├── file_handler.h
