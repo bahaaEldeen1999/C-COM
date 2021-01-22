@@ -1,4 +1,3 @@
-# Operating Systems common applications
 <div align="center">
   
   [![GitHub contributors](https://img.shields.io/github/contributors/bahaaEldeen1999/C-COM)](https://github.com/bahaaEldeen1999/C-COM/contributors)
@@ -12,6 +11,8 @@
   <img src="https://img.shields.io/github/issues-pr-raw/AbahaaEldeen1999/C-COM" />
 
 </div>
+# Operating Systems common applications
+
 ## About the project
 
 -   **The project contains three main concepts used in any operating system which are process scheduling, memory managemnt using buddy algorithm, and producer consumer problem**
