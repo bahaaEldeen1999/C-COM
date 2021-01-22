@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/github/languages/count/bahaaEldeen1999/C-COM" />
   <img src="https://img.shields.io/github/languages/top/bahaaEldeen1999/C-COM" />
   <img src="https://img.shields.io/github/languages/code-size/bahaaEldeen1999/C-COM" />
-  <img src="https://img.shields.io/github/issues-pr-raw/AbahaaEldeen1999/C-COM" />
+  <img src="https://img.shields.io/github/issues-pr-raw/bahaaEldeen1999/C-COM" />
 
 </div>
 
